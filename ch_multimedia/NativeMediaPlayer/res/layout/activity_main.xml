@@ -1,0 +1,44 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/source_select" />
+
+    <Spinner
+        android:id="@+id/source_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textView1"
+        android:text="@string/source_prompt" />
+
+    <Button
+        android:id="@+id/start_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/source_spinner"
+        android:text="@string/start" />
+
+    <SurfaceView
+        android:id="@+id/surfaceview1"
+        android:layout_width="320px"
+        android:layout_height="240px"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/start_btn"
+        android:layout_marginTop="28dp" />
+
+    <Button
+        android:id="@+id/rewind_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/surfaceview1"
+        android:layout_centerHorizontal="true"
+        android:text="@string/rewind" />
+
+</RelativeLayout>

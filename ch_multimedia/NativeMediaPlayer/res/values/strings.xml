@@ -1,0 +1,15 @@
+<resources>
+
+    <string name="app_name">NativeMediaPlayer</string>
+    <string name="title_activity_main">NativeMediaPlayer</string>
+    <string name="menu_settings">Settings</string>
+    <string name="start">Start</string>
+    <string name="rewind">Rewind</string>
+    <string name="source_select">Please select the media source</string>
+    <string name="source_prompt">Media source</string>
+
+    <string-array name="source_array">
+        <item>/sdcard/NativeMedia.ts</item>
+    </string-array>
+
+</resources>
