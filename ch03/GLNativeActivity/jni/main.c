@@ -205,8 +205,6 @@ static void engine_draw_frame(struct engine* engine) {
   if (engine->display == NULL) 
     return;
     
-  // カラーバッファ、デプスバッファのクリアー
-//  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // 四角形を描画
   drawBox();
   // ダブルバッファ入替
