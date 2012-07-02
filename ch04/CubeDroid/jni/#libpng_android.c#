@@ -1,0 +1,27 @@
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+
+#define PNG_DEBUG 3
+#include <png.h>
+
+#include "libpng_android.h"
+
+u_char *pngLoadImage(char *filename){
+  
+  
+  
+  return 1;
+}
+
+int pngGetWidth(u_char *pngbuf){
+  return 0;
+}
+
+int pngGetHeight(u_char *pngbuf){
+  return 0;
+}
+
+int getHeightPng
