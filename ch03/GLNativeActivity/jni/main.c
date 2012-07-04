@@ -18,6 +18,8 @@
 // デバッグ用メッセージ(Error)
 #define LOGE(...)  ((void)__android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__))
 
+static float angle = 0;
+
 // アプリ動作再開に必要なデータ
 struct saved_state
 {
@@ -27,8 +29,7 @@ struct saved_state
 };
 
 // アプリケーション内で共通して利用する情報
-struct engine
-{
+struct engine {
   struct android_app* app;
 
   // センサー関連
@@ -107,8 +108,6 @@ void initBox(struct engine* engine) {
   gluPerspective(40.0, ratio, 0.1, 100);
 }
 
-static float angle = 0;
-
 // 四角形の描画
 void drawBox(void) {
 
@@ -126,15 +125,15 @@ void drawBox(void) {
   glRotatef(angle, 0, 0, 1.0f);
 
   // バッファをクリアー
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // 頂点リストの有効化
-  glEnableClientState(GL_VERTEX_ARRAY);
-  // 頂点カラーリストの有効化
-  glEnableClientState(GL_COLOR_ARRAY);
+  glClear(GL_COLOR_BUFFER_BIT);
   // 頂点リスト指定
   glVertexPointer(3, GL_SHORT, 0, triangleBuffer);
+  // 頂点リストの有効化
+  glEnableClientState(GL_VERTEX_ARRAY);
   // 頂点カラーリスト指定
   glColorPointer(4, GL_FLOAT, 0, colorBuffer);
+  // 頂点カラーリストの有効化
+  glEnableClientState(GL_COLOR_ARRAY);
   // 三角形 描画
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
   glDisableClientState(GL_VERTEX_ARRAY);
@@ -214,7 +213,6 @@ static void engine_draw_frame(struct engine* engine) {
 // EGL情報を破棄する
 static void engine_term_display(struct engine* engine) {
   if (engine->display != EGL_NO_DISPLAY) {
-
     // EGLレンダリングコンテキストとEGLサーフェイスの関連を外す
     eglMakeCurrent(engine->display, 
                    EGL_NO_SURFACE, 

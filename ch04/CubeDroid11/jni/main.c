@@ -23,16 +23,9 @@
 #define FALSE (0)
 
 // アプリ動作再開に必要なデータ
-typedef struct _TouchPoint{
-    int32_t using;
-    float angle[3];
-    int32_t x;
-    int32_t y;
-} TouchPoint;
-
 struct saved_state
 {
-    TouchPoint point[POINT_MAX];
+      float angle[3];
 };
 
 // アプリケーション内で共通して利用する情報
@@ -62,9 +55,7 @@ struct engine
   struct saved_state state;
 };
 
-#undef PI
-#define PI 3.1415926535897932f
-
+// 頂点リスト
 static const GLfloat cubeVertices[] = {
   -1.0, -1.0,  1.0,
   1.0, -1.0,  1.0,
@@ -76,10 +67,12 @@ static const GLfloat cubeVertices[] = {
   1.0,  1.0, -1.0,
 };
 
+// 頂点インデックス
 static const GLushort cubeIndices[] = {
   0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1
 };
 
+// 頂点カラーリスト
 static const GLubyte cubeColors[] = {
   255, 255,   0, 255,
   0,   255, 255, 255,
@@ -92,64 +85,61 @@ static const GLubyte cubeColors[] = {
 };
 
 // 表示の初期化
-void initBox(struct engine* engine) {
+void initCube(struct engine* engine) {
 
   glEnable(GL_NORMALIZE);
+  // デプステスト有効化
   glEnable(GL_DEPTH_TEST);
+  // 背面処理有効化
   glEnable(GL_CULL_FACE);
+  // 前面のみ描画
   glCullFace(GL_FRONT);
+  // 陰影モード設定
   glShadeModel(GL_SMOOTH);
 
+  // 塗りつぶし色設定
   glClearColor(.7f, .7f, .9f, 1.f);
 
+  // 縦横比の設定
   glViewport(0, 0, (int) engine->width, (int) engine->height);
 
-  // 表示の初期化(毎フレーム)
+  // 表示の初期化
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
   glOrthof(-2.0, 2.0, -2.0 * engine->height / engine->width, 2.0 * engine->height / engine->width, -10.0, 10.0);
 
+}
+
+// 立方体の描画
+void drawCube(struct engine* engine) {
+
+  // 行列演算のモード設定
   glMatrixMode(GL_MODELVIEW);
+  // 単位行列のロード
   glLoadIdentity();
+
+  glTranslatef(0, 0, -2);
+
+  // 平行移動
+  glRotatef(engine->state.angle[0], 1.0f, 0, 0.5f);
+
+  // バッファをクリアー
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // 頂点リスト指定
+  glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
+  // 頂点リストの有効化
+  glEnableClientState(GL_VERTEX_ARRAY);
+  // 頂点カラーリスト指定
+  glColorPointer(4, GL_UNSIGNED_BYTE, 0, cubeColors);
+  // 頂点カラーリストの有効化
+  glEnableClientState(GL_COLOR_ARRAY);
+  // 立方体 描画
+  glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_SHORT, cubeIndices);
 }
 
-void drawBox(struct engine* engine) {
-//     表示の初期化(毎フレーム)
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    int i = 0;
-
-    TouchPoint *tp = &engine->state.point[i];
-
-
-    glPushMatrix();
-    glTranslatef(0, 0, -2);
-
-    glRotatef(tp->angle[0], 1.0f, 0, 0.5f);
-
-    // 描画する
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnableClientState(GL_VERTEX_ARRAY);
-
-    glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
-    glEnableClientState(GL_VERTEX_ARRAY);
-
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, cubeColors);
-    glEnableClientState(GL_COLOR_ARRAY);
-
-    glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_SHORT, cubeIndices);
-
-    glPopMatrix();
-}
-
-/**
- * デバイスに対してのEGLコンテキストの初期化
- */
+// EGL初期化
 static int engine_init_display(struct engine* engine) {
-    // OepGL ES と EGLの初期化
 
   EGLint w, h, dummy, format;
   EGLint numConfigs;
@@ -199,14 +189,13 @@ static int engine_init_display(struct engine* engine) {
   engine->width = w;
   engine->height = h;
 
-  int i = 0,j;
+  int j;
   for (j = 0; j < 3; j++){
-    engine->state.point[i].angle[i] = 0;
+    engine->state.angle[j] = 0;
   }
-  engine->state.point[i].using = TRUE;
 
-  // ボックス表示の初期化
-  initBox(engine);
+  // 立方体表示の初期化
+  initCube(engine);
 
   return 0;
 }
@@ -219,7 +208,7 @@ static void engine_draw_frame(struct engine* engine) {
     return;
     
   // 四角形を描画
-  drawBox(engine);
+  drawCube(engine);
   // ダブルバッファ入替
   eglSwapBuffers(engine->display, engine->surface);
 }
@@ -262,9 +251,7 @@ static int32_t engine_handle_input(struct android_app* app,
   return 0;
 }
 
-/**
- * メインコマンドの処理
- */
+// メインコマンドの処理
 static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     struct engine* engine = (struct engine*) app->userData;
     switch (cmd) {
@@ -327,9 +314,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     }
 }
 
-/**
- * アプリケーション開始
- */
+// Main関数
 void android_main(struct android_app* state) {
   struct engine engine;
 
@@ -416,12 +401,12 @@ void android_main(struct android_app* state) {
       // 次のフレームを描画するのに必要な処理を行う
       int i = 0,j;
 
-      engine.state.point[i].angle[0] -= 3;
+      engine.state.angle[0] -= 3;
       for (j = 0; j < 3; j++){
-        if (engine.state.point[i].angle[j] > 360)
-          engine.state.point[i].angle[j] -= 360;
-        if (engine.state.point[i].angle[j] < 0)
-          engine.state.point[i].angle[j] += 360;
+        if (engine.state.angle[j] > 360)
+          engine.state.angle[j] -= 360;
+        if (engine.state.angle[j] < 0)
+          engine.state.angle[j] += 360;
       }
       // 画面描画
       engine_draw_frame(&engine);
