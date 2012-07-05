@@ -1,151 +1,22 @@
-#include <jni.h>
-#include <errno.h>
 
-#include <EGL/egl.h>
-#include <GLES/gl.h>
-#include "glu.h"
+#include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
-#include <android/sensor.h>
-#include <android/log.h>
-#include <android_native_app_glue.h>
+#include "main.h"
 
-// デバッグ用メッセージ
-#define LOG_TAG "CubeDroid11"
+#define LOG_TAG    "cubedroid20"
 // デバッグ用メッセージ(Infomation)
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
+#define LOGI(...)  ((void)__android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__))
 // デバッグ用メッセージ(Warning)
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__))
 // デバッグ用メッセージ(Error)
 #define LOGE(...)  ((void)__android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__))
 
-#define POINT_MAX (5)
-#ifndef TRUE
-#define TRUE (1)
-#endif
-
-#ifndef FALSE
-#define FALSE (0)
-#endif
-// アプリ動作再開に必要なデータ
-struct saved_state
-{
-  int dummy;
-};
-
-// アプリケーション内で共通して利用する情報
-struct engine
-{
-  struct android_app* app;
-
-  // センサー関連
-  ASensorManager* sensorManager;
-  const ASensor* accelerometerSensor;
-  const ASensor* gyroscopeSensor;
-  ASensorEventQueue* sensorEventQueue;
-
-  // アニメーションフラグ
-  int animating;
-
-  // EGL
-  EGLDisplay display;
-  EGLSurface surface;
-  EGLContext context;
-
-  // 画面解像度
-  int32_t width;
-  int32_t height;
-
-  // 角度
-  float angle[3];
-
-  // 保存データ
-  struct saved_state state;
-};
-
-// 頂点リスト
-static const GLfloat cubeVertices[] = {
-  -1.0, -1.0,  1.0,
-   1.0, -1.0,  1.0,
-  -1.0,  1.0,  1.0,
-   1.0,  1.0,  1.0,
-  -1.0, -1.0, -1.0,
-   1.0, -1.0, -1.0,
-  -1.0,  1.0, -1.0,
-   1.0,  1.0, -1.0,
-};
-
-// 頂点インデックス
-static const GLushort cubeIndices[] = {
-  0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1
-};
-
-// 頂点カラーリスト
-static const GLubyte cubeColors[] = {
-  255, 255,   0, 255,
-  0,   255, 255, 255,
-  0,     0, 255, 255,
-  255,   0, 255, 255,
-  255, 255,   0, 255,
-  0,   255, 255, 255,
-  0,     0, 255, 255,
-  255,   0, 255, 255
-};
-
-// 表示の初期化
-void initCube(struct engine* engine) {
-
- // 法線ベクトル有効化
-  glEnable(GL_NORMALIZE);
-  // デプステスト有効化
-  glEnable(GL_DEPTH_TEST);
-  // 面の破棄処理有効化
-  glEnable(GL_CULL_FACE);
-
-  // 背面を破棄する
-  glCullFace(GL_BACK);
-  // 陰影モード設定
-  glShadeModel(GL_SMOOTH);
-
-}
-
-void prepareFrame(struct engine* engine) {
-
-  // ViewPortを指定
-  glViewport(0, 0, engine->width, engine->height);
-  // 塗りつぶし色設定
-  glClearColor(.7f, .7f, .9f, 1.f);
-  // カラーバッファ、デプスバッファをクリアー
-  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-  // PROJECTIONに切替
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  // 透視法射影設定
-  gluPerspective(45, (float) engine->width / engine->height, 0.5f, 500);
-
-  // MODELVIEWに切替
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
-
-// 立方体の描画
-void drawCube(struct engine* engine) {
-
-  // カメラの位置、向きを指定
-  gluLookAt(0,0,10  // 回転
-  glRotatef(engine->state.angle[0], 1.0f, 0, 0.5f);
-  // 頂点リスト指定
-  glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
-  // 頂点リストの有効化
-  glEnableClientState(GL_VERTEX_ARRAY);
-  // 頂点カラーリスト指定
-  glColorPointer(4, GL_UNSIGNED_BYTE, 0, cubeColors);
-  // 頂点カラーリストの有効化
-  glEnableClientState(GL_COLOR_ARRAY);
-  // 立方体 描画
-  glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_SHORT, cubeIndices);
-}
+extern void initCube(struct engine* engine);
+extern void prepareFrame(struct engine* engine);
+extern void drawCube(struct engine* engine);
 
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
@@ -159,6 +30,8 @@ static int engine_init_display(struct engine* engine) {
   // 有効にするEGLパラメータ
   const EGLint attribs[] =
     {
+      // レンダリングのタイプにGLES2.0を指定
+      EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
       //　サーフェイスのタイプを指定(ダブルバッファを利用するのでEGL_WINDOW_BIT)
       EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
       //　青が利用する最小フレームサイズ(単位はbit)
@@ -185,8 +58,10 @@ static int engine_init_display(struct engine* engine) {
   // EGLウィンドウサーフェイスの取得
   surface = eglCreateWindowSurface(display, config, engine->app->window,
                                    NULL);
+  // レンダリングコンテキストをGLES20にする
+  const EGLint attrib_list [] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
   // EGLレンダリングコンテキストの取得
-  context = eglCreateContext(display, config, NULL, NULL);
+  context = eglCreateContext(display, config, NULL, attrib_list);
   // EGLレンダリングコンテキストをEGLサーフェイスにアタッチする
   if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
     LOGW("Unable to eglMakeCurrent");
@@ -217,6 +92,7 @@ static int engine_init_display(struct engine* engine) {
 
   return 0;
 }
+
 
 // 毎フレームの描画処理
 static void engine_draw_frame(struct engine* engine) {
@@ -334,6 +210,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     }
 }
 
+
 // Main関数
 void android_main(struct android_app* state) {
   struct engine engine;
@@ -395,13 +272,13 @@ void android_main(struct android_app* state) {
               switch(event[i].type){
                 
               case ASENSOR_TYPE_ACCELEROMETER: // 加速度センサーの値を出力する
-                LOGI("accelerometer: x=%f y=%f z=%f",
-                     event[i].acceleration.x, event[i].acceleration.y,
-                     event[i].acceleration.z);
+//                LOGI("accelerometer: x=%f y=%f z=%f",
+//                     event[i].acceleration.x, event[i].acceleration.y,
+//                     event[i].acceleration.z);
                 break;
 
               case ASENSOR_TYPE_GYROSCOPE: // ジャイロスコープの値を出力する
-                LOGI("GYROSCOPE: x=%f y=%f z=%f",event[i].vector.azimuth,event[i].vector.pitch,event[i].vector.roll    );
+//                LOGI("GYROSCOPE: x=%f y=%f z=%f",event[i].vector.azimuth,event[i].vector.pitch,event[i].vector.roll    );
                 break;
               }
             }
@@ -433,3 +310,4 @@ void android_main(struct android_app* state) {
     }
   }
 }
+

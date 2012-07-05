@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="app_name">CubeDroid GLES20</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">CubeDroid GLES20</string>
+
+</resources>
