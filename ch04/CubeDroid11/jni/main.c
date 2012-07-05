@@ -3,6 +3,7 @@
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>
+#include "glu.h"
 #include <math.h>
 
 #include <android/sensor.h>
@@ -58,13 +59,13 @@ struct engine
 // 頂点リスト
 static const GLfloat cubeVertices[] = {
   -1.0, -1.0,  1.0,
-  1.0, -1.0,  1.0,
+   1.0, -1.0,  1.0,
   -1.0,  1.0,  1.0,
-  1.0,  1.0,  1.0,
+   1.0,  1.0,  1.0,
   -1.0, -1.0, -1.0,
-  1.0, -1.0, -1.0,
+   1.0, -1.0, -1.0,
   -1.0,  1.0, -1.0,
-  1.0,  1.0, -1.0,
+   1.0,  1.0, -1.0,
 };
 
 // 頂点インデックス
@@ -87,45 +88,46 @@ static const GLubyte cubeColors[] = {
 // 表示の初期化
 void initCube(struct engine* engine) {
 
+ // 法線ベクトル有効化
   glEnable(GL_NORMALIZE);
   // デプステスト有効化
   glEnable(GL_DEPTH_TEST);
-  // 背面処理有効化
+  // 面の破棄処理有効化
   glEnable(GL_CULL_FACE);
-  // 前面のみ描画
-  glCullFace(GL_FRONT);
+
+  // 背面を破棄する
+  glCullFace(GL_BACK);
   // 陰影モード設定
   glShadeModel(GL_SMOOTH);
 
+}
+
+void prepareFrame(struct engine* engine) {
+
+  // ViewPortを指定
+  glViewport(0, 0, engine->width, engine->height);
   // 塗りつぶし色設定
   glClearColor(.7f, .7f, .9f, 1.f);
+  // カラーバッファ、デプスバッファをクリアー
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-  // 縦横比の設定
-  glViewport(0, 0, (int) engine->width, (int) engine->height);
-
-  // 表示の初期化
+  // PROJECTIONに切替
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
+  // 透視法射影設定
+  gluPerspective(45, (float) engine->width / engine->height, 0.5f, 500);
 
-  glOrthof(-2.0, 2.0, -2.0 * engine->height / engine->width, 2.0 * engine->height / engine->width, -10.0, 10.0);
-
+  // MODELVIEWに切替
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
 }
 
 // 立方体の描画
 void drawCube(struct engine* engine) {
 
-  // 行列演算のモード設定
-  glMatrixMode(GL_MODELVIEW);
-  // 単位行列のロード
-  glLoadIdentity();
-
-  glTranslatef(0, 0, -2);
-
-  // 平行移動
+  // カメラの位置、向きを指定
+  gluLookAt(0,0,10  // 回転
   glRotatef(engine->state.angle[0], 1.0f, 0, 0.5f);
-
-  // バッファをクリアー
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // 頂点リスト指定
   glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
   // 頂点リストの有効化
@@ -149,10 +151,18 @@ static int engine_init_display(struct engine* engine) {
 
   // 有効にするEGLパラメータ
   const EGLint attribs[] =
-    { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, 
+    {
+      //　サーフェイスのタイプを指定(ダブルバッファを利用するのでEGL_WINDOW_BIT)
+      EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+      //　青が利用する最小フレームサイズ(単位はbit)
       EGL_BLUE_SIZE,  8,
-      EGL_GREEN_SIZE, 8, 
+      //　緑が利用する最小フレームサイズ(単位はbit)
+      EGL_GREEN_SIZE, 8,
+      //　赤が利用する最小フレームサイズ(単位はbit)
       EGL_RED_SIZE,   8,
+      //　デプスバッファとして確保するサイズ(単位はbit)
+      EGL_DEPTH_SIZE, 16,
+      //　終端
       EGL_NONE };
 
   // EGLディスプレイコネクションを取得
@@ -189,6 +199,7 @@ static int engine_init_display(struct engine* engine) {
   engine->width = w;
   engine->height = h;
 
+  // 初期値設定
   int j;
   for (j = 0; j < 3; j++){
     engine->state.angle[j] = 0;
@@ -206,8 +217,10 @@ static void engine_draw_frame(struct engine* engine) {
   // displayが無い場合は描画しない
   if (engine->display == NULL) 
     return;
-    
-  // 四角形を描画
+
+  // 描画前処理
+  prepareFrame(engine);
+  // 立方体を描画
   drawCube(engine);
   // ダブルバッファ入替
   eglSwapBuffers(engine->display, engine->surface);
@@ -320,8 +333,7 @@ void android_main(struct android_app* state) {
 
   // glueが削除されないように
   app_dummy();
-
-
+  // アプリ情報保存エリアの確保
   memset(&engine, 0, sizeof(engine));
   // ユーザーデータの配置
   state->userData = &engine;

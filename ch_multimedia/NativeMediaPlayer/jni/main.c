@@ -5,23 +5,22 @@
 #include <string.h>
 #include "jnihelper.h"
 
-// for __android_log_print(ANDROID_LOG_INFO, "YourApp", "formatted message");
 #include <android/log.h>
 #define TAG "NativeMedia"
 #define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, TAG, __VA_ARGS__)
 
-// for native media
+// OpenMAX ALヘッダ
 #include <OMXAL/OpenMAXAL.h>
 #include <OMXAL/OpenMAXAL_Android.h>
 
-// for native window JNI
+// ネイティブウィンドウ
 #include <android/native_window_jni.h>
 
-// engine interfaces
+// engineインターフェイス
 static XAObjectItf engineObject = NULL;
 static XAEngineItf engineEngine = NULL;
 
-// output mix interfaces
+// Output mixインターフェイス
 static XAObjectItf outputMixObject = NULL;
 
 // streaming media player interfaces
@@ -222,11 +221,11 @@ void createEngine(JNIEnv* env, jclass clazz)
 {
     XAresult res;
 
-    // create engine
+    // エンジンの新規作成
     res = xaCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
     assert(XA_RESULT_SUCCESS == res);
 
-    // realize the engine
+    // エンジンを実体化（リアライズ）した
     res = (*engineObject)->Realize(engineObject, XA_BOOLEAN_FALSE);
     assert(XA_RESULT_SUCCESS == res);
 
@@ -441,20 +440,20 @@ void shutdown(JNIEnv* env, jclass clazz)
         playerVolItf = NULL;
     }
 
-    // destroy output mix object, and invalidate all associated interfaces
+    // Output mixオブジェクトを破棄する。あわせて関連するインターフェイスを無効化する
     if (outputMixObject != NULL) {
         (*outputMixObject)->Destroy(outputMixObject);
         outputMixObject = NULL;
     }
 
-    // destroy engine object, and invalidate all associated interfaces
+    // engineを破棄する。あわせて関連するインターフェイスも無効化する
     if (engineObject != NULL) {
         (*engineObject)->Destroy(engineObject);
         engineObject = NULL;
         engineEngine = NULL;
     }
 
-    // close the file
+    // ファイルを閉じる
     if (file != NULL) {
         fclose(file);
         file = NULL;
@@ -468,15 +467,15 @@ void shutdown(JNIEnv* env, jclass clazz)
 }
 
 
-// set the surface
+// サーフェイスを設定する
 void setSurface(JNIEnv *env, jclass clazz, jobject surface)
 {
-    // obtain a native window from a Java surface
+  // Javaのサーフェイスを元にネイティブウィンドウを取り出す
   theNativeWindow = ANativeWindow_fromSurface(env, surface);
 }
 
 
-// rewind the streaming media player
+// ストリーミングメディアプレイヤーを巻き戻す
 void rewindStreamingMediaPlayer(JNIEnv *env, jclass clazz)
 {
     XAresult res;
