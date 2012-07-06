@@ -12,11 +12,11 @@
 // デバッグ用メッセージ
 #define TAG "native-activity"
 // デバッグ用メッセージ(Infomation)
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__))
 // デバッグ用メッセージ(Warning)
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__))
+#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, TAG, __VA_ARGS__))
 // デバッグ用メッセージ(Error)
-#define LOGE(...)  ((void)__android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__))
+#define LOGE(...)  ((void)__android_log_print(ANDROID_LOG_ERROR,TAG,__VA_ARGS__))
 
 static float angle = 0;
 
@@ -81,7 +81,7 @@ float colorBuffer[] = {
    0.5, 0.5, 0.0, 1.0, };
 
 // 表示の初期化
-void initBox(struct engine* engine) {
+void initDrow(struct engine* engine) {
 
   // 光源処理無効化
   glDisable(GL_LIGHTING);
@@ -192,7 +192,7 @@ static int engine_init_display(struct engine* engine) {
 
   // 矩形表示の初期化
   engine->state.angle = 0;
-  initBox(engine);
+  initDrow(engine);
 
   return 0;
 }

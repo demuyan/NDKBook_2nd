@@ -19,7 +19,6 @@
 // デバッグ用メッセージ(Error)
 #define LOGE(...)  ((void)__android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__))
 
-#define POINT_MAX (5)
 #ifndef TRUE
 #define TRUE (1)
 #endif
@@ -39,10 +38,10 @@ struct engine
   struct android_app* app;
 
   // センサー関連
-  ASensorManager* sensorManager;
-  const ASensor* accelerometerSensor;
-  const ASensor* gyroscopeSensor;
-  ASensorEventQueue* sensorEventQueue;
+  ASensorManager* sensorManager; // センサーマネージャ
+  const ASensor* accelerometerSensor; // 加速度センサー
+  const ASensor* gyroscopeSensor; // ジャイロスコープ
+  ASensorEventQueue* sensorEventQueue; // センサーイベントキュー
 
   // アニメーションフラグ
   int animating;
@@ -101,7 +100,6 @@ void initCube(struct engine* engine) {
   glEnable(GL_DEPTH_TEST);
   // 面の破棄処理有効化
   glEnable(GL_CULL_FACE);
-
   // 背面を破棄する
   glCullFace(GL_BACK);
   // 陰影モード設定
@@ -133,8 +131,9 @@ void prepareFrame(struct engine* engine) {
 void drawCube(struct engine* engine) {
 
   // カメラの位置、向きを指定
-  gluLookAt(0,0,10  // 回転
-  glRotatef(engine->state.angle[0], 1.0f, 0, 0.5f);
+  gluLookAt(0,0,10, 0,0,-100,0,1,0);
+  // 回転
+  glRotatef(engine->angle[0], 1.0f, 0, 0.5f);
   // 頂点リスト指定
   glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
   // 頂点リストの有効化
@@ -147,6 +146,7 @@ void drawCube(struct engine* engine) {
   glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_SHORT, cubeIndices);
 }
 
+/////begin p91_down_samplecode
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
 
@@ -157,7 +157,7 @@ static int engine_init_display(struct engine* engine) {
   EGLContext context;
 
   // 有効にするEGLパラメータ
-  const EGLint attribs[] =
+  const EGLint attribs[] =       /////-----(1) ここから
     {
       //　サーフェイスのタイプを指定(ダブルバッファを利用するのでEGL_WINDOW_BIT)
       EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -170,9 +170,9 @@ static int engine_init_display(struct engine* engine) {
       //　デプスバッファとして確保するサイズ(単位はbit)
       EGL_DEPTH_SIZE, 16,
       //　終端
-      EGL_NONE };
+      EGL_NONE };               /////-----(1) ここまで
 
-  // EGLディスプレイコネクションを取得
+  // EGLディスプレイコネクションを取得    /////-----(2) ここから
   EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
   // EGLディスプレイコネクション初期化
   eglInitialize(display, 0, 0);
@@ -204,20 +204,20 @@ static int engine_init_display(struct engine* engine) {
 
   // 画面解像度の保存
   engine->width = w;
-  engine->height = h;
+  engine->height = h;                    /////-----(2) ここまで
 
   // 初期値設定
-  int j;
+  int j;                                 /////-----(3) ここから
   for (j = 0; j < 3; j++){
     engine->angle[j] = 0;
   }
 
   // 立方体表示の初期化
-  initCube(engine);
+  initCube(engine);                       /////-----(3) ここまで
 
   return 0;
 }
-
+/////end
 // 毎フレームの描画処理
 static void engine_draw_frame(struct engine* engine) {
 
@@ -270,7 +270,7 @@ static int32_t engine_handle_input(struct android_app* app,
   }
   return 0;
 }
-
+/////begin p91_up_samplecode
 // メインコマンドの処理
 static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     struct engine* engine = (struct engine*) app->userData;
@@ -286,17 +286,17 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     case APP_CMD_INIT_WINDOW: // ウィンドウを初期化したとき
       if (engine->app->window != NULL) {
         // 画面を初期化する
-        engine_init_display(engine);
+        engine_init_display(engine);   /////-----(1)
         // 画面を描画する
-        engine_draw_frame(engine);
+        engine_draw_frame(engine);     /////-----(1)
       }
       break;
 
     case APP_CMD_TERM_WINDOW: // ウィンドウを破棄するとき
       // EGL情報を破棄する
-      engine_term_display(engine);
+      engine_term_display(engine);     /////-----(2)
       break;
-
+/////end
     case APP_CMD_GAINED_FOCUS: // アプリがフォーカスを取得したとき
       if (engine->accelerometerSensor != NULL) {
         // 加速度センサーを有効化する
@@ -333,7 +333,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
       break;
     }
 }
-
+/////begin p90_samplecode
 // Main関数
 void android_main(struct android_app* state) {
   struct engine engine;
@@ -349,6 +349,7 @@ void android_main(struct android_app* state) {
   // 入力イベント処理関数の設定
   state->onInputEvent = engine_handle_input;
   engine.app = state;
+/////end
 
   // センサーからのデータ取得に必要な初期化
   engine.sensorManager = ASensorManager_getInstance();

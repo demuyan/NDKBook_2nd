@@ -8,7 +8,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := cubedroid
-LOCAL_SRC_FILES := main.c libpng_android.c
+LOCAL_SRC_FILES := main.c glu.c libpng_android.c
 LOCAL_LDLIBS    := -llog -lz -landroid -lEGL -lGLESv1_CM 
 LOCAL_STATIC_LIBRARIES := android_native_app_glue libpng15-prebuilt
 

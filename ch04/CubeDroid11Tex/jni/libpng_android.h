@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <android/asset_manager.h>
 #include <android/log.h>
-
 #include <png.h>
 
 #ifndef TRUE
@@ -16,7 +15,7 @@
 #define FALSE (0)
 #endif
 
-#define  LOG_TAG    "native-activity"
+#define  LOG_TAG    "libpng_android"
 // デバッグ用メッセージ(Infomation)
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
 // デバッグ用メッセージ(Warning)

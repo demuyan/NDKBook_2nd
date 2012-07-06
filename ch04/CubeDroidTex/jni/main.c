@@ -3,14 +3,24 @@
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>
+#include "glu.h"
 #include <math.h>
-#include <stdbool.h>
 
 #include <android/sensor.h>
 #include <android/log.h>
 #include <android_native_app_glue.h>
 
 #include "libpng_android.h"
+
+// デバッグ用メッセージ
+#define LOG_TAG "CubeDroid11"
+// デバッグ用メッセージ(Infomation)
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
+// デバッグ用メッセージ(Warning)
+#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__))
+// デバッグ用メッセージ(Error)
+#define LOGE(...)  ((void)__android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__))
+
 
 
 #define POINT_MAX (5)
@@ -85,19 +95,6 @@ static const GLushort cubeIndices[] = {
   0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1
 };
 
-// 頂点カラーリスト
-static const GLubyte cubeColors[] = {
-/*  R    G    B    A  */
-  255, 255,   0, 255,
-  0,   255, 255, 255,
-  0,     0,   0,   0,
-  255,   0, 255, 255,
-  255, 255,   0, 255,
-  0,   255, 255, 255,
-  0,     0,   0,   0,
-  255,   0, 255, 255
-};
-
 // 頂点リスト
 const GLfloat cubeTexCoords[] = {
         1.0, 0.0,
@@ -149,7 +146,7 @@ void initBox(struct engine* engine) {
   }
 
   // 前面のみ描画（背面は描画しない）
-  glCullFace(GL_FRONT);
+  glCullFace(GL_BACK);
   // 陰影モード設定
 //  glShadeModel(GL_SMOOTH);
   glShadeModel(GL_FLAT);
@@ -171,17 +168,11 @@ void initBox(struct engine* engine) {
   }
 
   glOrthof(-2.0, 2.0, -2.0 * engine->height / engine->width, 2.0 * engine->height / engine->width, -10.0, 10.0);
-  if ((errCode = glGetError()) != GL_NO_ERROR){
-	  LOGI("line %d : GLErrorCode:%x ",__LINE__,errCode);
-  }
 
   // 行列演算のモード設定
   glMatrixMode(GL_MODELVIEW);
   // 単位行列のロード
   glLoadIdentity();
-  if ((errCode = glGetError()) != GL_NO_ERROR){
-	  LOGI("line %d : GLErrorCode:%x ",__LINE__,errCode);
-  }
 
 }
 

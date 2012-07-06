@@ -28,11 +28,11 @@
 // デバッグ用メッセージ
 #define TAG "InputCheck"
 // デバッグ用メッセージ(Infomation)
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__))
 // デバッグ用メッセージ(Warning)
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__))
+#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, TAG, __VA_ARGS__))
 // デバッグ用メッセージ(Error)
-#define LOGE(...)  ((void)__android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__))
+#define LOGE(...)  ((void)__android_log_print(ANDROID_LOG_ERROR,TAG,__VA_ARGS__))
 
 typedef struct _TouchPoint {
   int32_t x;
@@ -50,9 +50,9 @@ struct engine {
 
   // センサー関連
   ASensorManager* sensorManager;
-  const ASensor* accelerometerSensor;  // 加速度センサー
+  const ASensor* accelerometerSensor; // 加速度センサー
   ASensorEventQueue* sensorEventQueue; // センサーイベントキュー
-  
+
   // アニメーションフラグ
   int animating;
 
@@ -138,7 +138,7 @@ void RenderString(int x, int y, const char* message) {
 }
 
 // 表示の初期化
-void initBox(struct engine* engine) {
+void initDrow(struct engine* engine) {
 
   // 表示の初期化
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -157,7 +157,7 @@ void initBox(struct engine* engine) {
   u_int width = 256, height = 128;
   GLint type = GL_RGBA;
   glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type,
-               GL_UNSIGNED_SHORT_4_4_4_4, &fonttexture[63]);
+      GL_UNSIGNED_SHORT_4_4_4_4, &fonttexture[63]);
 
   // 光源処理無効化
   glDisable(GL_LIGHTING);
@@ -168,7 +168,7 @@ void initBox(struct engine* engine) {
   // デプステスト無効化
   glDisable(GL_DEPTH_TEST);
   // 塗りつぶし色設定
-  glClearColor(.7f, .7f, .9f, 1.f);
+  glClearColor(.0f, .0f, .0f, 1.f);
   // 陰影モード設定
   glShadeModel(GL_SMOOTH);
 
@@ -194,12 +194,8 @@ static int engine_init_display(struct engine* engine) {
   EGLContext context;
 
   // 有効にするEGLパラメータ
-  const EGLint attribs[] =
-    { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, 
-      EGL_BLUE_SIZE,  8,
-      EGL_GREEN_SIZE, 8, 
-      EGL_RED_SIZE,   8,
-      EGL_NONE };
+  const EGLint attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_BLUE_SIZE, 8,
+      EGL_GREEN_SIZE, 8, EGL_RED_SIZE, 8, EGL_NONE };
 
   // EGLディスプレイコネクションを取得
   EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -212,13 +208,12 @@ static int engine_init_display(struct engine* engine) {
   // NativeActivityへバッファを設定
   ANativeWindow_setBuffersGeometry(engine->app->window, 0, 0, format);
   // EGLウィンドウサーフェイスの取得
-  surface = eglCreateWindowSurface(display, config, engine->app->window,
-                                   NULL);
+  surface = eglCreateWindowSurface(display, config, engine->app->window, NULL);
   // EGLレンダリングコンテキストの取得
   context = eglCreateContext(display, config, NULL, NULL);
   // EGLレンダリングコンテキストをEGLサーフェイスにアタッチする
   if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
-    LOGW("Unable to eglMakeCurrent");
+    LOGE("Unable to eglMakeCurrent");
     return -1;
   }
 
@@ -240,8 +235,8 @@ static int engine_init_display(struct engine* engine) {
   engine->volumedown_keydown = FALSE;
   engine->volumeup_keydown = FALSE;
 
-  // ボックス表示の初期化
-  initBox(engine);
+  // 表示の初期化
+  initDrow(engine);
 
   return 0;
 }
@@ -266,7 +261,8 @@ void displayTouchPoint(struct engine* engine) {
   int i, y = 0;
   char buf[1024];
   for (i = 0; i < engine->point_count; i++) {
-    sprintf(buf, "TOUCH POINT(%d)=(%d,%d)", i, engine->point[i].x,        engine->point[i].y);
+    sprintf(buf, "TOUCH POINT(%d)=(%d,%d)", i, engine->point[i].x,
+        engine->point[i].y);
     RenderString(0, engine->height - 32 - y, buf);
     y += 32;
 
@@ -297,16 +293,15 @@ void displayKeys(struct engine* engine) {
   RenderString(engine->width / 2 + 64, engine->height - 32 - y, buf);
   y += 32;
   // 音量下ボタンの状態を表示
- sprintf(buf, "VOLUMEDOWN = %s", engine->volumedown_keydown ? "DOWN" : "UP");
+  sprintf(buf, "VOLUMEDOWN = %s", engine->volumedown_keydown ? "DOWN" : "UP");
   RenderString(engine->width / 2 + 64, engine->height - 32 - y, buf);
 }
-
 
 //  毎フレーム描画
 static void engine_draw_frame(struct engine* engine) {
 
   // displayが無い場合は描画しない
-  if (engine->display == NULL) 
+  if (engine->display == NULL)
     return;
 
   // モデル表示モードにする
@@ -333,15 +328,13 @@ static void engine_draw_frame(struct engine* engine) {
 static void engine_term_display(struct engine* engine) {
   if (engine->display != EGL_NO_DISPLAY) {
     // EGLレンダリングコンテキストとEGLサーフェイスの関連を外す
-    eglMakeCurrent(engine->display, 
-                   EGL_NO_SURFACE, 
-                   EGL_NO_SURFACE,
-                   EGL_NO_CONTEXT);
+    eglMakeCurrent(engine->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+        EGL_NO_CONTEXT);
     // EGLレンダリングコンテキストを破棄する
-    if (engine->context != EGL_NO_CONTEXT) 
+    if (engine->context != EGL_NO_CONTEXT)
       eglDestroyContext(engine->display, engine->context);
     // EGLサーフェイスを破棄する
-    if (engine->surface != EGL_NO_SURFACE) 
+    if (engine->surface != EGL_NO_SURFACE)
       eglDestroySurface(engine->display, engine->surface);
     // EGLディスプレイを破棄する
     eglTerminate(engine->display);
@@ -360,8 +353,7 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 
   // ユーザデータの取得
   switch (AInputEvent_getType(event)) {
-  case AINPUT_EVENT_TYPE_MOTION: 
-  {
+  case AINPUT_EVENT_TYPE_MOTION: {
     // アニメーション有効化
     engine->animating = 1;
 
@@ -390,10 +382,9 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 
     return 1;
   }
-  break;
+    break;
 
-  case AINPUT_EVENT_TYPE_KEY: 
-  {
+  case AINPUT_EVENT_TYPE_KEY: {
 
     int keycode, keyaction;
     // キーコードを取得
@@ -401,7 +392,6 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
     // 音量キー（上）が変化した
     if (keycode == AKEYCODE_VOLUME_UP) {
       keyaction = AKeyEvent_getAction(event);
-
 
       if (keyaction == AKEY_EVENT_ACTION_DOWN) {
         // キーを押した
@@ -422,12 +412,10 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
         engine->volumedown_keydown = FALSE;
       }
     }
-    
-  }
-  break;
 
   }
-
+    break;
+  }
   return 0;
 }
 
@@ -455,7 +443,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     engine_term_display(engine);
     break;
 
-  case APP_CMD_GAINED_FOCUS:  // アプリがフォーカスを取得したとき
+  case APP_CMD_GAINED_FOCUS: // アプリがフォーカスを取得したとき
     if (engine->accelerometerSensor != NULL) {
       // 加速度センサーを有効化する
       ASensorEventQueue_enableSensor(engine->sensorEventQueue,
@@ -500,11 +488,10 @@ void android_main(struct android_app* state) {
   engine.sensorManager = ASensorManager_getInstance();
   // 加速度センサーのデータ取得準備
   engine.accelerometerSensor = ASensorManager_getDefaultSensor(
-    engine.sensorManager, ASENSOR_TYPE_ACCELEROMETER);
+      engine.sensorManager, ASENSOR_TYPE_ACCELEROMETER);
   // センサー情報取得キューの新規作成
   engine.sensorEventQueue = ASensorManager_createEventQueue(
-    engine.sensorManager, state->looper, LOOPER_ID_USER, NULL,
-    NULL);
+      engine.sensorManager, state->looper, LOOPER_ID_USER, NULL, NULL);
 
   if (state->savedState != NULL) {
     // 以前の状態に戻す
@@ -519,8 +506,8 @@ void android_main(struct android_app* state) {
     struct android_poll_source* source;
 
     // アプリケーションの状態にあわせてセンサー情報の処理を行う
-    while ((ident = ALooper_pollAll(engine.animating ? 0 : -1, NULL,
-                                    &events, (void**) &source)) >= 0) {
+    while ((ident = ALooper_pollAll(engine.animating ? 0 : -1, NULL, &events,
+        (void**) &source)) >= 0) {
 
       // 内部イベントを処理する
       if (source != NULL) {
@@ -544,18 +531,7 @@ void android_main(struct android_app* state) {
         return;
       }
     }
-
-    if (engine.animating) {
-      // 次のフレームを描画するのに必要な処理を行う
-      engine.state.angle += .01f;
-      if (engine.state.angle > 1) {
-        engine.state.angle = 0;
-      }
-
-    }
-
     // 画面の描画
     engine_draw_frame(&engine);
-
   }
 }
