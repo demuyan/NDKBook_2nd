@@ -90,6 +90,7 @@ static const char gFragmentShader[] =
   "void main() {                       \n"
   "  gl_FragColor = DestinationColor;  \n"
   "}\n";
+
 // シェーダープログラムを設定する
 GLuint loadShader(GLenum shaderType, const char* pSource) {
   GLuint shader = glCreateShader(shaderType);
@@ -157,27 +158,28 @@ GLuint createProgram(const char* pVertexSource, const char* pFragmentSource) {
   return program;
 }
 
+/////begin gles20_samplecode_2
 void initCube(struct engine* engine) {
-
-  gProgram = createProgram(gVertexShader, gFragmentShader);
+  // 頂点シェーダー、フラグメントシェーダーを設定する
+  gProgram = createProgram(gVertexShader, gFragmentShader);   /////----- (1)
   if (!gProgram) {
     LOGE("Could not create program.");
     return;
   }
 
-  // シェーダープログラムに頂点座標リストを結びつける
-  glBindAttribLocation(gProgram, ATTRIB_VERTEX, "Position");
+  // 頂点シェーダーに頂点座標リストを結びつける
+  glBindAttribLocation(gProgram, ATTRIB_VERTEX, "Position");   /////----- (2)
 
-  // シェーダープログラムに頂点カラーリストを結びつける
+  // フラグメントシェーダーに頂点カラーリストを結びつける
   glBindAttribLocation(gProgram, ATTRIB_COLOR, "SourceColor");
 
   // 利用するシェーダープログラムを指定する
-  glUseProgram(gProgram);
+  glUseProgram(gProgram);                                      /////----- (3)
 
   // デプステストを有効化する
   glEnable(GL_DEPTH_TEST);
 }
-
+/////end
 #undef PI
 #define PI 3.1415926535897932f
 
@@ -194,6 +196,7 @@ mat4 getPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar) {
       zNear ,zFar * 65536);
 }
 
+/////begin gles20_samplecode_3
 void prepareFrame(struct engine* engine) {
 
   // ViewPortを指定
@@ -207,22 +210,19 @@ void prepareFrame(struct engine* engine) {
   glCullFace(GL_BACK);
 
   // 透視変換行列の設定
-  GLint projectionUniform = glGetUniformLocation(gProgram, "Projection");
-  checkGlError("glGetUniformLocation");
-
+  GLint projectionUniform = glGetUniformLocation(gProgram, "Projection");                          /////----- (1) ここから
   mat4 projectionMatrix = getPerspective(45, (float) engine->width / engine->height, 0.5f, 500);
-
-  glUniformMatrix4fv(projectionUniform, 1, 0, projectionMatrix.Pointer());
-
+  glUniformMatrix4fv(projectionUniform, 1, 0, projectionMatrix.Pointer());                         /////----- (1) ここまで
 }
+/////end
 
 
-
+/////begin gles20_samplecode_4
 // レンダリングを行う
 void drawCube(struct engine* engine) {
 
   // 立方体の姿勢特定、行列取得
-  mat4 rotationX = mat4::RotateX(engine->angle[0]);
+  mat4 rotationX = mat4::RotateX(engine->angle[0]);                         /////----- (1) ここから
   mat4 rotationY = mat4::RotateY(engine->angle[1]);
   mat4 rotationZ = mat4::RotateZ(engine->angle[2]);
 
@@ -232,20 +232,21 @@ void drawCube(struct engine* engine) {
     
   // 表示物の姿勢設定
   int modelviewUniform = glGetUniformLocation(gProgram, "Modelview");
-  glUniformMatrix4fv(modelviewUniform, 1, 0, modelviewMatrix.Pointer());
+  glUniformMatrix4fv(modelviewUniform, 1, 0, modelviewMatrix.Pointer());      /////----- (1) ここまで
 
   //頂点の設定
-  glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, cubeVertices);
+  glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, cubeVertices); /////----- (2)
   // 色の指定
-  glVertexAttribPointer(ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, cubeColors);
+  glVertexAttribPointer(ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, cubeColors);     /////----- (3)
 
   glEnableVertexAttribArray(ATTRIB_VERTEX);
   glEnableVertexAttribArray(ATTRIB_COLOR);
 
-//     描画する
-  glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_SHORT, cubeIndices);
+  // 描画する
+  glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_SHORT, cubeIndices);   /////----- (4)
 
   glDisableVertexAttribArray(ATTRIB_VERTEX);
   glDisableVertexAttribArray(ATTRIB_COLOR);
 }
+/////end
 

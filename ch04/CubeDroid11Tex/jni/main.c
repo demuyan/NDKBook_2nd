@@ -94,12 +94,12 @@ static const GLfloat cubeVertices[] = {
 
 // 頂点描画順
 static const GLushort cubeIndices[] = {
-   0, 1, 2,   2, 3, 0,  //front
-   5, 4, 7,   7, 6, 5,  //back
-   8, 9,10,  10,11, 8,  //right
-  12,13,14,  14,15,12,  //left
-  16,17,18,  18,19,16,  //top
-  20,21,22,  22,23,20  //bottom
+   0, 1, 2,   2, 3, 0,
+   5, 4, 7,   7, 6, 5,
+   8, 9,10,  10,11, 8,
+  12,13,14,  14,15,12,
+  16,17,18,  18,19,16,
+  20,21,22,  22,23,20 
 };
 
 // テクスチャ位置
@@ -111,7 +111,7 @@ const GLfloat cubeTexCoords[] = {
   0,0,1,0,1,1,0,1,
   0,0,1,0,1,1,0,1
 };
-
+/////begin gl11tex_samplecode_3.txt
 // 表示の初期化
 void initCube(struct engine* engine) {
 
@@ -125,13 +125,14 @@ void initCube(struct engine* engine) {
   glCullFace(GL_BACK);
   // 陰影モード設定
   glShadeModel(GL_SMOOTH);
-
+  // 利用するテクスチャは非圧縮とする
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
   // テクスチャの生成
   glGenTextures(1, &texName[0]);
   glBindTexture(GL_TEXTURE_2D, &texName[0]);
 
+  // テクスチャ表示設定
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -141,11 +142,10 @@ void initCube(struct engine* engine) {
   GLint type;
   GLubyte *textureImage;
 
-  int flg = loadPngImage(engine->assetManager,  "texture.png", &width, &height, &type, &textureImage);
-
+  loadPngImage(engine->assetManager,  "texture.png", &width, &height, &type, &textureImage);
   glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, textureImage);
 }
-
+/////end
 void prepareFrame(struct engine* engine) {
 
   // ViewPortを指定
@@ -166,7 +166,7 @@ void prepareFrame(struct engine* engine) {
   glLoadIdentity();
 }
 
-
+/////begin gl11tex_samplecode_4.txt
 // 立方体の描画
 void drawCube(struct engine* engine) {
 
@@ -180,14 +180,14 @@ void drawCube(struct engine* engine) {
   glEnableClientState(GL_VERTEX_ARRAY);
   
   // テクスチャの指定
-  glEnable(GL_TEXTURE_2D);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glTexCoordPointer(2, GL_FLOAT, 0, cubeTexCoords);
+  glEnable(GL_TEXTURE_2D);                                /////-----(1) ここから
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);           
+  glTexCoordPointer(2, GL_FLOAT, 0, cubeTexCoords);       /////-----(1)　ここまで
 
   // 立方体を描画
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, cubeIndices);
 }
-
+/////end
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
 
@@ -328,7 +328,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     if (engine->app->window != NULL) {
       // 画面を初期化する
       engine_init_display(engine);
-
+      // アニメーションを有効化する
       engine->animating = 1;
       // 画面を描画する
       engine_draw_frame(engine);

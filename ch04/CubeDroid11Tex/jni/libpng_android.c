@@ -22,6 +22,7 @@ void callback_read(png_structp pPng, png_bytep buf, png_size_t size) {
   offset += size;
 }
 
+/////begin gl11tex_samplecode_2
 int loadPngImage(AAssetManager* mgr, char *filename, png_uint_32* outWidth,
     png_uint_32* outHeight, GLint *type, u_char **outData) {
 
@@ -136,3 +137,4 @@ int loadPngImage(AAssetManager* mgr, char *filename, png_uint_32* outWidth,
   /* That's it */
   return TRUE;
 }
+/////end

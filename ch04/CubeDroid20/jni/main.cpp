@@ -18,6 +18,7 @@ extern void initCube(struct engine* engine);
 extern void prepareFrame(struct engine* engine);
 extern void drawCube(struct engine* engine);
 
+/////begin gles20_samplecode_1
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
 
@@ -31,7 +32,7 @@ static int engine_init_display(struct engine* engine) {
   const EGLint attribs[] =
     {
       // レンダリングのタイプにGLES2.0を指定
-      EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+      EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,      /////-----(1)
       //　サーフェイスのタイプを指定(ダブルバッファを利用するのでEGL_WINDOW_BIT)
       EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
       //　青が利用する最小フレームサイズ(単位はbit)
@@ -59,9 +60,9 @@ static int engine_init_display(struct engine* engine) {
   surface = eglCreateWindowSurface(display, config, engine->app->window,
                                    NULL);
   // レンダリングコンテキストをGLES20にする
-  const EGLint attrib_list [] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+  const EGLint attrib_list [] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};      /////-----(2) ここから
   // EGLレンダリングコンテキストの取得
-  context = eglCreateContext(display, config, NULL, attrib_list);
+  context = eglCreateContext(display, config, NULL, attrib_list);               /////-----(2) ここまで
   // EGLレンダリングコンテキストをEGLサーフェイスにアタッチする
   if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
     LOGW("Unable to eglMakeCurrent");
@@ -89,9 +90,10 @@ static int engine_init_display(struct engine* engine) {
 
   // 立方体表示の初期化
   initCube(engine);
-
+  
   return 0;
 }
+/////begin
 
 
 // 毎フレームの描画処理

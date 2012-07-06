@@ -15,7 +15,7 @@
             android:name="android.app.NativeActivity"
             android:label="@string/title_activity_main" >
             <meta-data android:name="android.app.lib_name"
-                    android:value="cubedroid" />
+                    android:value="cubedroid11tex" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

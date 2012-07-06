@@ -91,10 +91,11 @@ static const GLubyte cubeColors[] = {
   255,   0, 255, 255
 };
 
+/////begin p93_down_samplecode
 // 表示の初期化
 void initCube(struct engine* engine) {
 
- // 法線ベクトル有効化
+  // 法線ベクトル有効化
   glEnable(GL_NORMALIZE);
   // デプステスト有効化
   glEnable(GL_DEPTH_TEST);
@@ -104,9 +105,9 @@ void initCube(struct engine* engine) {
   glCullFace(GL_BACK);
   // 陰影モード設定
   glShadeModel(GL_SMOOTH);
-
 }
-
+/////end
+// 描画前処理
 void prepareFrame(struct engine* engine) {
 
   // ViewPortを指定
@@ -127,9 +128,9 @@ void prepareFrame(struct engine* engine) {
   glLoadIdentity();
 }
 
+/////begin p96_samplecode
 // 立方体の描画
 void drawCube(struct engine* engine) {
-
   // カメラの位置、向きを指定
   gluLookAt(0,0,10, 0,0,-100,0,1,0);
   // 回転
@@ -145,6 +146,20 @@ void drawCube(struct engine* engine) {
   // 立方体 描画
   glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_SHORT, cubeIndices);
 }
+// 毎フレームの描画処理
+static void engine_draw_frame(struct engine* engine) {
+
+  // displayが無い場合は描画しない
+  if (engine->display == NULL) 
+    return;
+  // 描画前処理
+  prepareFrame(engine);     /////-----(1)
+  // 立方体を描画
+  drawCube(engine);         /////-----(2)
+  // ダブルバッファ入替
+  eglSwapBuffers(engine->display, engine->surface);  /////-----(3)
+}
+/////end
 
 /////begin p91_down_samplecode
 // EGL初期化
@@ -218,21 +233,8 @@ static int engine_init_display(struct engine* engine) {
   return 0;
 }
 /////end
-// 毎フレームの描画処理
-static void engine_draw_frame(struct engine* engine) {
 
-  // displayが無い場合は描画しない
-  if (engine->display == NULL) 
-    return;
-
-  // 描画前処理
-  prepareFrame(engine);
-  // 立方体を描画
-  drawCube(engine);
-  // ダブルバッファ入替
-  eglSwapBuffers(engine->display, engine->surface);
-}
-
+/////begin p97_samplecode
 // EGL情報を破棄する
 static void engine_term_display(struct engine* engine) {
   if (engine->display != EGL_NO_DISPLAY) {
@@ -273,65 +275,65 @@ static int32_t engine_handle_input(struct android_app* app,
 /////begin p91_up_samplecode
 // メインコマンドの処理
 static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
-    struct engine* engine = (struct engine*) app->userData;
-    switch (cmd) {
+  struct engine* engine = (struct engine*) app->userData;
+  switch (cmd) {
 
-    case APP_CMD_SAVE_STATE: // 状態保存を行うとき
-      // 状態保存エリア取得
-      engine->app->savedState = malloc(sizeof(struct saved_state));
-      *((struct saved_state*) engine->app->savedState) = engine->state;
-      engine->app->savedStateSize = sizeof(struct saved_state);
-      break;
+  case APP_CMD_SAVE_STATE: // 状態保存を行うとき
+    // 状態保存エリア取得
+    engine->app->savedState = malloc(sizeof(struct saved_state));
+    *((struct saved_state*) engine->app->savedState) = engine->state;
+    engine->app->savedStateSize = sizeof(struct saved_state);
+    break;
 
-    case APP_CMD_INIT_WINDOW: // ウィンドウを初期化したとき
-      if (engine->app->window != NULL) {
-        // 画面を初期化する
-        engine_init_display(engine);   /////-----(1)
-        // 画面を描画する
-        engine_draw_frame(engine);     /////-----(1)
-      }
-      break;
-
-    case APP_CMD_TERM_WINDOW: // ウィンドウを破棄するとき
-      // EGL情報を破棄する
-      engine_term_display(engine);     /////-----(2)
-      break;
-/////end
-    case APP_CMD_GAINED_FOCUS: // アプリがフォーカスを取得したとき
-      if (engine->accelerometerSensor != NULL) {
-        // 加速度センサーを有効化する
-        ASensorEventQueue_enableSensor(engine->sensorEventQueue,
-                                       engine->accelerometerSensor);
-        // センサー情報取得間隔を設定する
-        ASensorEventQueue_setEventRate(engine->sensorEventQueue,
-                                       engine->accelerometerSensor, (1000L / 60) * 1000);
-      }
-      if (engine->gyroscopeSensor != NULL) {
-        // ジャイロスコープを有効化する
-        ASensorEventQueue_enableSensor(engine->sensorEventQueue,
-                                       engine->gyroscopeSensor);
-        // センサー情報取得間隔を設定する
-        ASensorEventQueue_setEventRate(engine->sensorEventQueue,
-                                       engine->gyroscopeSensor, (1000L / 60) * 1000);
-      }
-      break;
-    case APP_CMD_LOST_FOCUS: // フォーカスが消失したとき
-      if (engine->accelerometerSensor != NULL) {
-        // 加速度センサーを無効化する
-        ASensorEventQueue_disableSensor(engine->sensorEventQueue,
-                                        engine->accelerometerSensor);
-      }
-      if (engine->gyroscopeSensor != NULL) {
-        // ジャイロスコープを無効化する
-        ASensorEventQueue_disableSensor(engine->sensorEventQueue,
-                                        engine->gyroscopeSensor);
-      }
-      // アニメーション停止
-      engine->animating = 0;
-      // 画面を表示
-      engine_draw_frame(engine);
-      break;
+  case APP_CMD_INIT_WINDOW: // ウィンドウを初期化したとき
+    if (engine->app->window != NULL) {
+      // 画面を初期化する
+      engine_init_display(engine);   /////-----(1)
+      // 画面を描画する
+      engine_draw_frame(engine);     /////-----(1)
     }
+    break;
+
+  case APP_CMD_TERM_WINDOW: // ウィンドウを破棄するとき
+    // EGL情報を破棄する
+    engine_term_display(engine);     /////-----(2)
+    break;
+/////end
+  case APP_CMD_GAINED_FOCUS: // アプリがフォーカスを取得したとき
+    if (engine->accelerometerSensor != NULL) {
+      // 加速度センサーを有効化する
+      ASensorEventQueue_enableSensor(engine->sensorEventQueue,
+                                     engine->accelerometerSensor);
+      // センサー情報取得間隔を設定する
+      ASensorEventQueue_setEventRate(engine->sensorEventQueue,
+                                     engine->accelerometerSensor, (1000L / 60) * 1000);
+    }
+    if (engine->gyroscopeSensor != NULL) {
+      // ジャイロスコープを有効化する
+      ASensorEventQueue_enableSensor(engine->sensorEventQueue,
+                                     engine->gyroscopeSensor);
+      // センサー情報取得間隔を設定する
+      ASensorEventQueue_setEventRate(engine->sensorEventQueue,
+                                     engine->gyroscopeSensor, (1000L / 60) * 1000);
+    }
+    break;
+  case APP_CMD_LOST_FOCUS: // フォーカスが消失したとき
+    if (engine->accelerometerSensor != NULL) {
+      // 加速度センサーを無効化する
+      ASensorEventQueue_disableSensor(engine->sensorEventQueue,
+                                      engine->accelerometerSensor);
+    }
+    if (engine->gyroscopeSensor != NULL) {
+      // ジャイロスコープを無効化する
+      ASensorEventQueue_disableSensor(engine->sensorEventQueue,
+                                      engine->gyroscopeSensor);
+    }
+    // アニメーション停止
+    engine->animating = 0;
+    // 画面を表示
+    engine_draw_frame(engine);
+    break;
+  }
 }
 /////begin p90_samplecode
 // Main関数
