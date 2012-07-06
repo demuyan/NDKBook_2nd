@@ -297,6 +297,81 @@ void displayKeys(struct engine* engine) {
   RenderString(engine->width / 2 + 64, engine->height - 32 - y, buf);
 }
 
+// Configurationを表示する
+void displayConfiguration(struct engine* engine)
+{
+  int idx = 0;
+  const char orientation_list[][32] = {"ORIENTATION_ANY","ORIENTATION_PORT", "ORIENTATION_LAND","ORIENTATION_SQUARE"};
+  const char touchscreen_list[][32] = {"TOUCHSCREEN_ANY","TOUCHSCREEN_NOTOUCH","TOUCHSCREEN_STYLUS","TOUCHSCREEN_FINGER"};
+  const char density_list[][32] = {"DENSITY_DEFAULT","DENSITY_LOW","DENSITY_MEDIUM","DENSITY_HIGH","DENSITY_NONE"};
+  const char keyboard_list[][32] = {"KEYBOARD_ANY","KEYBOARD_NOKEYS","KEYBOARD_QWERTY","KEYBOARD_12KEY"};
+  const char navigation_list[][32] = {"NAVIGATION_ANY","NAVIGATION_NONAV","NAVIGATION_DPAD","NAVIGATION_TRACKBALL","NAVIGATION_WHEEL"};
+  const char keyshidden_list[][32] = {"KEYSHIDDEN_ANY","KEYSHIDDEN_NO","KEYSHIDDEN_YES","KEYSHIDDEN_SOFT"};
+  const char navhidden_list[][32] = {"NAVHIDDEN_ANY","NAVHIDDEN_NO","NAVHIDDEN_YES"};
+  const char screensize_list[][32] = {"SCREENSIZE_ANY","SCREENSIZE_SMALL","SCREENSIZE_NORMAL","SCREENSIZE_LARGE","SCREENSIZE_XLARGE"};
+  const char screenlong_list[][32] = {"SCREENLONG_ANY","SCREENLONG_NO","SCREENLONG_YES",};
+  const char uimodetype_list[][32] = {"UI_MODE_TYPE_ANY","UI_MODE_TYPE_NORMAL","UI_MODE_TYPE_DESK","UI_MODE_TYPE_CAR"};
+  const char uimodenight_list[][32] = {"UI_MODE_NIGHT_ANY","UI_MODE_NIGHT_NO","UI_MODE_NIGHT_YES"};
+
+  // 言語を取得(２文字が返る)
+  char language[3] = {0};
+  AConfiguration_getLanguage(engine->app->config, language);
+  LOGI("Language:%s",language);
+
+  // 国を取得(２文字が返る)
+  char country[3] = {0};
+  AConfiguration_getCountry(engine->app->config, country);
+  LOGI("Country:%s", country);
+
+  // 画面の向きを取得
+  idx = AConfiguration_getOrientation(engine->app->config);
+  LOGI("Orientation:%s", orientation_list[idx]);
+
+  // タッチスクリーン
+  idx =AConfiguration_getTouchscreen(engine->app->config);
+  LOGI("Touchscreen:%s", touchscreen_list[idx]);
+
+  // 解像度
+  int density =AConfiguration_getDensity(engine->app->config);
+  LOGI("Density:%d", density);
+
+  // キーボード
+  idx =AConfiguration_getKeyboard(engine->app->config);
+  LOGI("Keyboard:%s", keyboard_list[idx]);
+
+  // ナビゲーション
+  idx =AConfiguration_getNavigation(engine->app->config);
+  LOGI("Navigation:%s", keyboard_list[idx]);
+
+  // キーの隠し方
+  idx =AConfiguration_getKeysHidden(engine->app->config);
+  LOGI("KeysHidden:%s", keyshidden_list[idx]);
+
+  // ナビゲーションの隠し方
+  idx =AConfiguration_getNavHidden(engine->app->config);
+  LOGI("NaviHidden:%s", navhidden_list[idx]);
+
+  // SDK(API)バージョン
+  int ver =AConfiguration_getSdkVersion(engine->app->config);
+  LOGI("SdkVersion:%d", ver);
+
+  // スクリーンサイズ
+  idx =AConfiguration_getScreenSize(engine->app->config);
+  LOGI("ScreenSize:%s", screensize_list[idx]);
+
+  // スクリーンロング
+  idx =AConfiguration_getScreenLong(engine->app->config);
+  LOGI("ScreenLong:%s", screenlong_list[idx]);
+
+  // UIモードタイプ
+  idx =AConfiguration_getUiModeType(engine->app->config);
+  LOGI("UiModeType:%s", uimodetype_list[idx]);
+
+  // UIモード（夜）タイプ
+  idx =AConfiguration_getUiModeNight(engine->app->config);
+  LOGI("UiModeNight:%s", uimodenight_list[idx]);
+}
+
 //  毎フレーム描画
 static void engine_draw_frame(struct engine* engine) {
 
@@ -497,6 +572,9 @@ void android_main(struct android_app* state) {
     // 以前の状態に戻す
     engine.state = *(struct saved_state*) state->savedState;
   }
+
+  // Configurationを表示
+  displayConfiguration(&engine);
 
   engine.animating = 1;
   while (1) {
