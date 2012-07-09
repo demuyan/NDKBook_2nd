@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <android/log.h>
 
-
 #ifndef _jnihelper_h
 #define _jnihelper_h
 #ifdef __cplusplus

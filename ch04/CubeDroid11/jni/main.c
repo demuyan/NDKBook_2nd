@@ -27,14 +27,12 @@
 #define FALSE (0)
 #endif
 // アプリ動作再開に必要なデータ
-struct saved_state
-{
+struct saved_state {
   int dummy;
 };
 
 // アプリケーション内で共通して利用する情報
-struct engine
-{
+struct engine {
   struct android_app* app;
 
   // センサー関連
@@ -132,7 +130,7 @@ void prepareFrame(struct engine* engine) {
 // 立方体の描画
 void drawCube(struct engine* engine) {
   // カメラの位置、向きを指定
-  gluLookAt(0,0,10, 0,0,-100,0,1,0);
+  gluLookAt(0, 0, 10, 0, 0, -100, 0, 1, 0);
   // 回転
   glRotatef(engine->angle[0], 1.0f, 0, 0.5f);
   // 頂点リスト指定
@@ -150,14 +148,14 @@ void drawCube(struct engine* engine) {
 static void engine_draw_frame(struct engine* engine) {
 
   // displayが無い場合は描画しない
-  if (engine->display == NULL) 
+  if (engine->display == NULL)
     return;
   // 描画前処理
-  prepareFrame(engine);     /////-----(1)
+  prepareFrame(engine); /////-----(1)
   // 立方体を描画
-  drawCube(engine);         /////-----(2)
+  drawCube(engine); /////-----(2)
   // ダブルバッファ入替
-  eglSwapBuffers(engine->display, engine->surface);  /////-----(3)
+  eglSwapBuffers(engine->display, engine->surface); /////-----(3)
 }
 /////end
 
@@ -172,20 +170,20 @@ static int engine_init_display(struct engine* engine) {
   EGLContext context;
 
   // 有効にするEGLパラメータ
-  const EGLint attribs[] =       /////-----(1) ここから
-    {
-      //　サーフェイスのタイプを指定(ダブルバッファを利用するのでEGL_WINDOW_BIT)
-      EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-      //　青が利用する最小フレームサイズ(単位はbit)
-      EGL_BLUE_SIZE,  8,
-      //　緑が利用する最小フレームサイズ(単位はbit)
-      EGL_GREEN_SIZE, 8,
-      //　赤が利用する最小フレームサイズ(単位はbit)
-      EGL_RED_SIZE,   8,
-      //　デプスバッファとして確保するサイズ(単位はbit)
-      EGL_DEPTH_SIZE, 16,
-      //　終端
-      EGL_NONE };               /////-----(1) ここまで
+  const EGLint attribs[] = /////-----(1) ここから
+      {
+          //　サーフェイスのタイプを指定(ダブルバッファを利用するのでEGL_WINDOW_BIT)
+          EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+          //　青が利用する最小フレームサイズ(単位はbit)
+          EGL_BLUE_SIZE, 8,
+          //　緑が利用する最小フレームサイズ(単位はbit)
+          EGL_GREEN_SIZE, 8,
+          //　赤が利用する最小フレームサイズ(単位はbit)
+          EGL_RED_SIZE, 8,
+          //　デプスバッファとして確保するサイズ(単位はbit)
+          EGL_DEPTH_SIZE, 16,
+          //　終端
+          EGL_NONE }; /////-----(1) ここまで
 
   // EGLディスプレイコネクションを取得    /////-----(2) ここから
   EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -198,8 +196,7 @@ static int engine_init_display(struct engine* engine) {
   // NativeActivityへバッファを設定
   ANativeWindow_setBuffersGeometry(engine->app->window, 0, 0, format);
   // EGLウィンドウサーフェイスの取得
-  surface = eglCreateWindowSurface(display, config, engine->app->window,
-                                   NULL);
+  surface = eglCreateWindowSurface(display, config, engine->app->window, NULL);
   // EGLレンダリングコンテキストの取得
   context = eglCreateContext(display, config, NULL, NULL);
   // EGLレンダリングコンテキストをEGLサーフェイスにアタッチする
@@ -219,16 +216,16 @@ static int engine_init_display(struct engine* engine) {
 
   // 画面解像度の保存
   engine->width = w;
-  engine->height = h;                    /////-----(2) ここまで
+  engine->height = h; /////-----(2) ここまで
 
   // 初期値設定
-  int j;                                 /////-----(3) ここから
-  for (j = 0; j < 3; j++){
+  int j; /////-----(3) ここから
+  for (j = 0; j < 3; j++) {
     engine->angle[j] = 0;
   }
 
   // 立方体表示の初期化
-  initCube(engine);                       /////-----(3) ここまで
+  initCube(engine); /////-----(3) ここまで
 
   return 0;
 }
@@ -239,15 +236,13 @@ static int engine_init_display(struct engine* engine) {
 static void engine_term_display(struct engine* engine) {
   if (engine->display != EGL_NO_DISPLAY) {
     // EGLレンダリングコンテキストとEGLサーフェイスの関連を外す
-    eglMakeCurrent(engine->display, 
-                   EGL_NO_SURFACE, 
-                   EGL_NO_SURFACE,
+    eglMakeCurrent(engine->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                    EGL_NO_CONTEXT);
     // EGLレンダリングコンテキストを破棄する
-    if (engine->context != EGL_NO_CONTEXT) 
-      eglDestroyContext(engine->display, engine->context);    
+    if (engine->context != EGL_NO_CONTEXT)
+      eglDestroyContext(engine->display, engine->context);
     // EGLサーフェイスを破棄する
-    if (engine->surface != EGL_NO_SURFACE) 
+    if (engine->surface != EGL_NO_SURFACE)
       eglDestroySurface(engine->display, engine->surface);
     // EGLディスプレイを破棄する
     eglTerminate(engine->display);
@@ -259,10 +254,10 @@ static void engine_term_display(struct engine* engine) {
   engine->context = EGL_NO_CONTEXT;
   engine->surface = EGL_NO_SURFACE;
 }
+/////end
 
 // 入力イベントを処理する
-static int32_t engine_handle_input(struct android_app* app,
-                                   AInputEvent* event) {
+static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) {
   // ユーザデータの取得
   struct engine* engine = (struct engine*) app->userData;
   if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
@@ -288,15 +283,15 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
   case APP_CMD_INIT_WINDOW: // ウィンドウを初期化したとき
     if (engine->app->window != NULL) {
       // 画面を初期化する
-      engine_init_display(engine);   /////-----(1)
+      engine_init_display(engine); /////-----(1)
       // 画面を描画する
-      engine_draw_frame(engine);     /////-----(1)
+      engine_draw_frame(engine); /////-----(1)
     }
     break;
 
   case APP_CMD_TERM_WINDOW: // ウィンドウを破棄するとき
     // EGL情報を破棄する
-    engine_term_display(engine);     /////-----(2)
+    engine_term_display(engine); /////-----(2)
     break;
 /////end
   case APP_CMD_GAINED_FOCUS: // アプリがフォーカスを取得したとき
@@ -306,7 +301,8 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
                                      engine->accelerometerSensor);
       // センサー情報取得間隔を設定する
       ASensorEventQueue_setEventRate(engine->sensorEventQueue,
-                                     engine->accelerometerSensor, (1000L / 60) * 1000);
+                                     engine->accelerometerSensor,
+                                     (1000L / 60) * 1000);
     }
     if (engine->gyroscopeSensor != NULL) {
       // ジャイロスコープを有効化する
@@ -314,7 +310,8 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
                                      engine->gyroscopeSensor);
       // センサー情報取得間隔を設定する
       ASensorEventQueue_setEventRate(engine->sensorEventQueue,
-                                     engine->gyroscopeSensor, (1000L / 60) * 1000);
+                                     engine->gyroscopeSensor,
+                                     (1000L / 60) * 1000);
     }
     break;
   case APP_CMD_LOST_FOCUS: // フォーカスが消失したとき
@@ -357,14 +354,13 @@ void android_main(struct android_app* state) {
   engine.sensorManager = ASensorManager_getInstance();
   // 加速度センサーのデータ取得準備
   engine.accelerometerSensor = ASensorManager_getDefaultSensor(
-    engine.sensorManager, ASENSOR_TYPE_ACCELEROMETER);
+      engine.sensorManager, ASENSOR_TYPE_ACCELEROMETER);
   // ジャイロスコープのデータ取得準備
   engine.gyroscopeSensor = ASensorManager_getDefaultSensor(
-    engine.sensorManager, ASENSOR_TYPE_GYROSCOPE );
+      engine.sensorManager, ASENSOR_TYPE_GYROSCOPE);
   // センサー情報取得キューの新規作成
   engine.sensorEventQueue = ASensorManager_createEventQueue(
-    engine.sensorManager, state->looper, LOOPER_ID_USER, NULL,
-    NULL);
+      engine.sensorManager, state->looper, LOOPER_ID_USER, NULL, NULL);
 
   if (state->savedState != NULL) {
     // 以前の状態に戻す
@@ -377,8 +373,8 @@ void android_main(struct android_app* state) {
     struct android_poll_source* source;
 
     // アプリケーションの状態にあわせてセンサー情報の処理を行う
-    while ((ident = ALooper_pollAll(engine.animating ? 0 : -1, NULL,
-                                    &events, (void**) &source)) >= 0) {
+    while ((ident = ALooper_pollAll(engine.animating ? 0 : -1, NULL, &events,
+                                    (void**) &source)) >= 0) {
 
       // 内部イベントを処理する
       if (source != NULL) {
@@ -391,20 +387,19 @@ void android_main(struct android_app* state) {
           ASensorEvent event[2];
           int count;
           int i;
-          while ((count = ASensorEventQueue_getEvents(
-                    engine.sensorEventQueue, event, 2)) > 0) {
+          while ((count = ASensorEventQueue_getEvents(engine.sensorEventQueue,
+                                                      event, 2)) > 0) {
+            for (i = 0; i < count; i++) {
+              switch (event[i].type) {
 
-            for (i = 0; i < count; i++){
-              switch(event[i].type){
-                
               case ASENSOR_TYPE_ACCELEROMETER: // 加速度センサーの値を出力する
-                LOGI("accelerometer: x=%f y=%f z=%f",
-                     event[i].acceleration.x, event[i].acceleration.y,
-                     event[i].acceleration.z);
+                LOGI(
+                    "accelerometer: x=%f y=%f z=%f", event[i].acceleration.x, event[i].acceleration.y, event[i].acceleration.z);
                 break;
 
               case ASENSOR_TYPE_GYROSCOPE: // ジャイロスコープの値を出力する
-                LOGI("GYROSCOPE: x=%f y=%f z=%f",event[i].vector.azimuth,event[i].vector.pitch,event[i].vector.roll    );
+                LOGI(
+                    "GYROSCOPE: x=%f y=%f z=%f", event[i].vector.azimuth, event[i].vector.pitch, event[i].vector.roll);
                 break;
               }
             }
@@ -421,11 +416,11 @@ void android_main(struct android_app* state) {
 
     if (engine.animating) {
       // 次のフレームを描画するのに必要な処理を行う
-      int i = 0,j;
+      int i = 0, j;
 
       engine.angle[0] += 3;
       engine.angle[1] += 1;
-      for (j = 0; j < 3; j++){
+      for (j = 0; j < 3; j++) {
         if (engine.angle[j] > 360)
           engine.angle[j] -= 360;
         if (engine.angle[j] < 0)

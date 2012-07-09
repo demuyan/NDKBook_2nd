@@ -111,7 +111,7 @@ const GLfloat cubeTexCoords[] = {
   0,0,1,0,1,1,0,1,
   0,0,1,0,1,1,0,1
 };
-/////begin gl11tex_samplecode_3.txt
+/////begin gl11tex_samplecode_3
 // 表示の初期化
 void initCube(struct engine* engine) {
 
@@ -166,7 +166,7 @@ void prepareFrame(struct engine* engine) {
   glLoadIdentity();
 }
 
-/////begin gl11tex_samplecode_4.txt
+/////begin gl11tex_samplecode_4
 // 立方体の描画
 void drawCube(struct engine* engine) {
 

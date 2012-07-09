@@ -1,4 +1,4 @@
-#/////begin gl11tex_samplecode_
+#/////begin gl11tex_samplecode_1
 LOCAL_PATH := $(call my-dir)
 
 # prebuildされたモジュールをリンクできるようにする

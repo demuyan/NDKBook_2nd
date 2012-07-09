@@ -9,7 +9,8 @@
  * Mesa 3D Graphics library. http://www.mesa3d.org
  */
 void gluLookAt(GLfloat eyex, GLfloat eyey, GLfloat eyez, GLfloat centerx,
-    GLfloat centery, GLfloat centerz, GLfloat upx, GLfloat upy, GLfloat upz) {
+               GLfloat centery, GLfloat centerz, GLfloat upx, GLfloat upy,
+               GLfloat upz) {
   GLfloat m[16];
   GLfloat x[3], y[3], z[3];
   GLfloat mag;
@@ -89,7 +90,7 @@ void gluLookAt(GLfloat eyex, GLfloat eyey, GLfloat eyez, GLfloat centerx,
 
   /* Translate Eye to Origin */
   glTranslatex((GLfixed) (-eyex * 65536), (GLfixed) (-eyey * 65536),
-      (GLfixed) (-eyez * 65536));
+               (GLfixed) (-eyez * 65536));
 }
 
 void gluPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar) {
@@ -101,6 +102,6 @@ void gluPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar) {
   xmax = ymax * aspect;
 
   glFrustumx((GLfixed) (xmin * 65536), (GLfixed) (xmax * 65536),
-      (GLfixed) (ymin * 65536), (GLfixed) (ymax * 65536),
-      (GLfixed) (zNear * 65536), (GLfixed) (zFar * 65536));
+             (GLfixed) (ymin * 65536), (GLfixed) (ymax * 65536),
+             (GLfixed) (zNear * 65536), (GLfixed) (zFar * 65536));
 }

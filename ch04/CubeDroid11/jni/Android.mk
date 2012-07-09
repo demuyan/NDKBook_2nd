@@ -8,7 +8,10 @@ LOCAL_MODULE    := cubedroid11
 # モジュールを構成するC/C++のソースコード
 LOCAL_SRC_FILES := main.c glu.c
 # リンクするライブラリ
-LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
+LOCAL_LDLIBS    := -llog \ 
+                   -landroid \  #Android関連（NativeActivityなど）ライブラリ 
+                   -lEGL \　     #EGLライブラリ
+                   -lGLESv1_CM  #OpenGL|ES1.1ライブラリ
 # native_app_glue のリンク指定
 LOCAL_STATIC_LIBRARIES := android_native_app_glue 
 
