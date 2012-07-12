@@ -9,518 +9,438 @@
 #define TAG "NativeMedia"
 #define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, TAG, __VA_ARGS__)
 
-// OpenMAX ALヘッダ
+// ネイティブメディアのヘッダファイル
 #include <OMXAL/OpenMAXAL.h>
 #include <OMXAL/OpenMAXAL_Android.h>
 
-// ネイティブウィンドウ
 #include <android/native_window_jni.h>
 
 // engineインターフェイス
 static XAObjectItf engineObject = NULL;
 static XAEngineItf engineEngine = NULL;
 
-// Output mixインターフェイス
+//　output mixインターフェイス
 static XAObjectItf outputMixObject = NULL;
 
-// streaming media player interfaces
-static XAObjectItf             playerObj = NULL;
-static XAPlayItf               playerPlayItf = NULL;
+// ストリーミングメディアプレイヤーのインターフェイス
+static XAObjectItf playerObj = NULL;
+static XAPlayItf playerPlayItf = NULL;
 static XAAndroidBufferQueueItf playerBQItf = NULL;
-static XAStreamInformationItf  playerStreamInfoItf = NULL;
-static XAVolumeItf             playerVolItf = NULL;
-
-// number of required interfaces for the MediaPlayer creation
-#define NB_MAXAL_INTERFACES 3 // XAAndroidBufferQueueItf, XAStreamInformationItf and XAPlayItf
-
-// video sink for the player
+static XAStreamInformationItf playerStreamInfoItf = NULL;
+static XAVolumeItf playerVolItf = NULL;
+// プレイヤーのためのビデオシンク
 static ANativeWindow* theNativeWindow;
 
-// number of buffers in our buffer queue, an arbitrary number
+// メディアプレイヤーを生成するのに必要なインターフェイスの数
+#define NB_MAXAL_INTERFACES 3 // XAAndroidBufferQueueItf, XAStreamInformationItf and XAPlayItf
+// バッファーキューの数（数値は適当）
 #define NB_BUFFERS 8
-
-// we're streaming MPEG-2 transport stream data, operate on transport stream block size
+// MPEG-2トランスポートパケットサイズ
 #define MPEG2_TS_PACKET_SIZE 188
-
-// number of MPEG-2 transport stream blocks per buffer, an arbitrary number
+// バッファあたりのMEPG-2トランスポートパケット数（数値は適当）
 #define PACKETS_PER_BUFFER 10
-
-// determines how much memory we're dedicating to memory caching
+// メモリーキャッシュするためのメモリーサイズ
 #define BUFFER_SIZE (PACKETS_PER_BUFFER*MPEG2_TS_PACKET_SIZE)
-
-// where we cache in memory the data to play
-// note this memory is re-used by the buffer queue callback
+// 再生するデータを格納するキャッシュエリア
+// このメモリーはバッファーキューコールバックによって再利用される
 static char dataCache[BUFFER_SIZE * NB_BUFFERS];
 
-// handle of the file to play
+// 再生するファイルのハンドル
 static FILE *file;
-
-// has the app reached the end of the file
+// ファイルの最後まで届いたか？
 static jboolean reachedEof = JNI_FALSE;
-
-// constant to identify a buffer context which is the end of the stream to decode
-static const int kEosBufferCntxt = 1980; // a magic value we can compare against
-
-// For mutual exclusion between callback thread and application thread(s).
-// The mutex protects reachedEof, discontinuity,
-// The condition is signalled when a discontinuity is acknowledged.
-
+// ストリーム最後のバッファーコンテキストIDを定義
+static const int kEosBufferCntxt = 1980; // 数値はマジックナンバー
+// mutexでコールバックスレッドとアプリケーションスレッドの同期を取る
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+// condは再生の中断を通知するためのシグナルとなる
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-
-// whether a discontinuity is in progress
+// 再生中断しているか？
 static jboolean discontinuity = JNI_FALSE;
 
 static jboolean enqueueInitialBuffers(jboolean discontinuity);
 
-// AndroidBufferQueueItf callback to supply MPEG-2 TS packets to the media player
-static XAresult AndroidBufferQueueCallback(
-        XAAndroidBufferQueueItf caller,
-        void *pCallbackContext,        /* input */
-        void *pBufferContext,          /* input */
-        void *pBufferData,             /* input */
-        XAuint32 dataSize,             /* input */
-        XAuint32 dataUsed,             /* input */
-        const XAAndroidBufferItem *pItems,/* input */
-        XAuint32 itemsLength           /* input */)
-{
-    XAresult res;
-    int ok;
+//　MEPG-2パケットからメディアプレイヤーにデータを供給するためのコールバック
+static XAresult AndroidBufferQueueCallback(XAAndroidBufferQueueItf caller,
+                                           void *pCallbackContext,
+                                           void *pBufferContext,
+                                           void *pBufferData,
+                                           XAuint32 dataSize,
+                                           XAuint32 dataUsed,
+                                           const XAAndroidBufferItem *pItems,
+                                           XAuint32 itemsLength ) {
+  pthread_mutex_lock(&mutex);
 
-    // pCallbackContext was specified as NULL at RegisterCallback and is unused here
-    assert(NULL == pCallbackContext);
-
-    // note there is never any contention on this mutex unless a discontinuity request is active
-    ok = pthread_mutex_lock(&mutex);
-    assert(0 == ok);
-
-    // was a discontinuity requested?
-    if (discontinuity) {
-        // Note: can't rewind after EOS, which we send when reaching EOF
-        // (don't send EOS if you plan to play more content through the same player)
-        if (!reachedEof) {
-            // clear the buffer queue
-            res = (*playerBQItf)->Clear(playerBQItf);
-            assert(XA_RESULT_SUCCESS == res);
-            // rewind the data source so we are guaranteed to be at an appropriate point
-            rewind(file);
-            // Enqueue the initial buffers, with a discontinuity indicator on first buffer
-            (void) enqueueInitialBuffers(JNI_TRUE);
-        }
-        // acknowledge the discontinuity request
-        discontinuity = JNI_FALSE;
-        ok = pthread_cond_signal(&cond);
-        assert(0 == ok);
-        goto exit;
+  // 再生中断の要求があったか？
+  if (discontinuity) {
+    if (!reachedEof) {
+       // バッファーキューをクリアーする
+      (*playerBQItf)->Clear(playerBQItf);
+      // ファイルの指示位置を最初に戻す
+      rewind(file);
+      // 最初のバッファを中断の指示を含めてキューに貯めこむ
+      (void) enqueueInitialBuffers(JNI_TRUE);
     }
 
-    if ((pBufferData == NULL) && (pBufferContext != NULL)) {
-        const int processedCommand = *(int *)pBufferContext;
-        if (kEosBufferCntxt == processedCommand) {
-            LOGV("EOS was processed\n");
-            // our buffer with the EOS message has been consumed
-            assert(0 == dataSize);
-            goto exit;
-        }
+    discontinuity = JNI_FALSE;
+    pthread_cond_signal(&cond);
+
+    goto exit;
+  }
+
+  if ((pBufferData == NULL) && (pBufferContext != NULL)) {
+    const int processedCommand = *(int *) pBufferContext;
+    if (kEosBufferCntxt == processedCommand) {
+      LOGV("EOS was processed\n");
+      // EOSメッセージあるバッファを消費する
+      goto exit;
     }
+  }
 
-    // pBufferData is a pointer to a buffer that we previously Enqueued
-    assert((dataSize > 0) && ((dataSize % MPEG2_TS_PACKET_SIZE) == 0));
-    assert(dataCache <= (char *) pBufferData && (char *) pBufferData <
-            &dataCache[BUFFER_SIZE * NB_BUFFERS]);
-    assert(0 == (((char *) pBufferData - dataCache) % BUFFER_SIZE));
+  // 一度EOFにヒットしたら、これ以上読み込こませない
+  if (reachedEof) {
+    goto exit;
+  }
 
-    // don't bother trying to read more data once we've hit EOF
-    if (reachedEof) {
-        goto exit;
-    }
+  size_t nbRead;
 
-    size_t nbRead;
-    // note we do call fread from multiple threads, but never concurrently
-    size_t bytesRead;
-    bytesRead = fread(pBufferData, 1, BUFFER_SIZE, file);
-    if (bytesRead > 0) {
-        if ((bytesRead % MPEG2_TS_PACKET_SIZE) != 0) {
-            LOGV("Dropping last packet because it is not whole");
-        }
-        size_t packetsRead = bytesRead / MPEG2_TS_PACKET_SIZE;
-        size_t bufferSize = packetsRead * MPEG2_TS_PACKET_SIZE;
-        res = (*caller)->Enqueue(caller, NULL /*pBufferContext*/,
-                pBufferData /*pData*/,
-                bufferSize /*dataLength*/,
-                NULL /*pMsg*/,
-                0 /*msgLength*/);
-        assert(XA_RESULT_SUCCESS == res);
-    } else {
-        // EOF or I/O error, signal EOS
-        XAAndroidBufferItem msgEos[1];
-        msgEos[0].itemKey = XA_ANDROID_ITEMKEY_EOS;
-        msgEos[0].itemSize = 0;
-        // EOS message has no parameters, so the total size of the message is the size of the key
-        //   plus the size if itemSize, both XAuint32
-        res = (*caller)->Enqueue(caller, (void *)&kEosBufferCntxt /*pBufferContext*/,
-                NULL /*pData*/, 0 /*dataLength*/,
-                msgEos /*pMsg*/,
-                sizeof(XAuint32)*2 /*msgLength*/);
-        assert(XA_RESULT_SUCCESS == res);
-        reachedEof = JNI_TRUE;
-    }
-
-exit:
-    ok = pthread_mutex_unlock(&mutex);
-    assert(0 == ok);
-    return XA_RESULT_SUCCESS;
-}
-
-
-// callback invoked whenever there is new or changed stream information
-static void StreamChangeCallback(XAStreamInformationItf caller,
-        XAuint32 eventId,
-        XAuint32 streamIndex,
-        void * pEventData,
-        void * pContext )
-{
-    LOGV("StreamChangeCallback called for stream %u", streamIndex);
-    // pContext was specified as NULL at RegisterStreamChangeCallback and is unused here
-    assert(NULL == pContext);
-    switch (eventId) {
-      case XA_STREAMCBEVENT_PROPERTYCHANGE: {
-        /** From spec 1.0.1:
-            "This event indicates that stream property change has occurred.
-            The streamIndex parameter identifies the stream with the property change.
-            The pEventData parameter for this event is not used and shall be ignored."
-         */
-
-        XAresult res;
-        XAuint32 domain;
-        res = (*caller)->QueryStreamType(caller, streamIndex, &domain);
-        assert(XA_RESULT_SUCCESS == res);
-        switch (domain) {
-          case XA_DOMAINTYPE_VIDEO: {
-            XAVideoStreamInformation videoInfo;
-            res = (*caller)->QueryStreamInformation(caller, streamIndex, &videoInfo);
-            assert(XA_RESULT_SUCCESS == res);
-            LOGV("Found video size %u x %u, codec ID=%u, frameRate=%u, bitRate=%u, duration=%u ms",
-                        videoInfo.width, videoInfo.height, videoInfo.codecId, videoInfo.frameRate,
-                        videoInfo.bitRate, videoInfo.duration);
-          } break;
-          default:
-            fprintf(stderr, "Unexpected domain %u\n", domain);
-            break;
-        }
-      } break;
-      default:
-        fprintf(stderr, "Unexpected stream event ID %u\n", eventId);
-        break;
-    }
-}
-
-
-// create the engine and output mix objects
-void createEngine(JNIEnv* env, jclass clazz)
-{
-    XAresult res;
-
-    // エンジンの新規作成
-    res = xaCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // エンジンを実体化（リアライズ）した
-    res = (*engineObject)->Realize(engineObject, XA_BOOLEAN_FALSE);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // get the engine interface, which is needed in order to create other objects
-    res = (*engineObject)->GetInterface(engineObject, XA_IID_ENGINE, &engineEngine);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // create output mix
-    res = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0, NULL, NULL);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // realize the output mix
-    res = (*outputMixObject)->Realize(outputMixObject, XA_BOOLEAN_FALSE);
-    assert(XA_RESULT_SUCCESS == res);
-
-}
-
-
-// Enqueue the initial buffers, and optionally signal a discontinuity in the first buffer
-static jboolean enqueueInitialBuffers(jboolean discontinuity)
-{
-
-    /* Fill our cache.
-     * We want to read whole packets (integral multiples of MPEG2_TS_PACKET_SIZE).
-     * fread returns units of "elements" not bytes, so we ask for 1-byte elements
-     * and then check that the number of elements is a multiple of the packet size.
-     */
-    size_t bytesRead;
-    bytesRead = fread(dataCache, 1, BUFFER_SIZE * NB_BUFFERS, file);
-    if (bytesRead <= 0) {
-        // could be premature EOF or I/O error
-        return JNI_FALSE;
-    }
+  // freadは複数のスレッドから呼ばれるが、同時に行なってはならない
+  size_t bytesRead;
+  bytesRead = fread(pBufferData, 1, BUFFER_SIZE, file);
+  if (bytesRead > 0) {
     if ((bytesRead % MPEG2_TS_PACKET_SIZE) != 0) {
-        LOGV("Dropping last packet because it is not whole");
+      LOGV("Dropping last packet because it is not whole");
     }
     size_t packetsRead = bytesRead / MPEG2_TS_PACKET_SIZE;
-    LOGV("Initially queueing %u packets", packetsRead);
+    size_t bufferSize = packetsRead * MPEG2_TS_PACKET_SIZE;
+    (*caller)->Enqueue(caller,
+                       NULL /*pBufferContext*/,
+                       pBufferData /*pData*/,
+                       bufferSize /*dataLength*/,
+                       NULL /*pMsg*/,
+                       0 /*msgLength*/);
+  } else {
+     // EOFか I/Oエラーだったら EOSを発行する
+    XAAndroidBufferItem msgEos[1];
+    msgEos[0].itemKey = XA_ANDROID_ITEMKEY_EOS;
+    msgEos[0].itemSize = 0;
+    // EOSメッセージは、パラメータを持たない。
+    // メッセージのサイズは、keyとitemSizesの合計（どちらもXAuint32型）
+    (*caller)->Enqueue(caller,
+                       (void *) &kEosBufferCntxt /*pBufferContext*/,
+                       NULL /*pData*/, 
+                       0 /*dataLength*/, 
+                       msgEos /*pMsg*/,
+                       sizeof(XAuint32) * 2 /*msgLength*/);
+    reachedEof = JNI_TRUE;
+  }
 
-    /* Enqueue the content of our cache before starting to play,
-       we don't want to starve the player */
-    size_t i;
-    for (i = 0; i < NB_BUFFERS && packetsRead > 0; i++) {
-        // compute size of this buffer
-        size_t packetsThisBuffer = packetsRead;
-        if (packetsThisBuffer > PACKETS_PER_BUFFER) {
-            packetsThisBuffer = PACKETS_PER_BUFFER;
-        }
-        size_t bufferSize = packetsThisBuffer * MPEG2_TS_PACKET_SIZE;
-        XAresult res;
-        if (discontinuity) {
-            // signal discontinuity
-            XAAndroidBufferItem items[1];
-            items[0].itemKey = XA_ANDROID_ITEMKEY_DISCONTINUITY;
-            items[0].itemSize = 0;
-            // DISCONTINUITY message has no parameters,
-            //   so the total size of the message is the size of the key
-            //   plus the size if itemSize, both XAuint32
-            res = (*playerBQItf)->Enqueue(playerBQItf, NULL /*pBufferContext*/,
-                    dataCache + i*BUFFER_SIZE, bufferSize, items /*pMsg*/,
-                    sizeof(XAuint32)*2 /*msgLength*/);
-            discontinuity = JNI_FALSE;
-        } else {
-            res = (*playerBQItf)->Enqueue(playerBQItf, NULL /*pBufferContext*/,
-                    dataCache + i*BUFFER_SIZE, bufferSize, NULL, 0);
-        }
-        assert(XA_RESULT_SUCCESS == res);
-        packetsRead -= packetsThisBuffer;
-    }
-
-    return JNI_TRUE;
+  exit: pthread_mutex_unlock(&mutex);
+  return XA_RESULT_SUCCESS;
 }
 
+// ストリーミング情報が新しくなる、もしくは変化した場合は、このコールバックが呼び出される
+static void StreamChangeCallback(XAStreamInformationItf caller,
+                                 XAuint32 eventId, XAuint32 streamIndex,
+                                 void * pEventData, void * pContext) {
+  LOGV("StreamChangeCallback called for stream %u", streamIndex);
 
-// create streaming media player
-jboolean createStreamingMediaPlayer(JNIEnv* env,
-        jclass clazz, jstring filename)
-{
-    XAresult res;
-
-    // convert Java string to UTF-8
-    const char *utf8 = (*env)->GetStringUTFChars(env, filename, NULL);
-    assert(NULL != utf8);
-
-    // open the file to play
-    file = fopen(utf8, "rb");
-    if (file == NULL) {
-        return JNI_FALSE;
+  switch (eventId) {
+  case XA_STREAMCBEVENT_PROPERTYCHANGE: {
+    XAuint32 domain;
+    (*caller)->QueryStreamType(caller, streamIndex, &domain);
+    switch (domain) {
+    case XA_DOMAINTYPE_VIDEO: {
+      // ビデオ情報取得
+      XAVideoStreamInformation videoInfo;
+      (*caller)->QueryStreamInformation(caller, streamIndex, &videoInfo);
+      LOGV(
+          "Found video size %u x %u, codec ID=%u, frameRate=%u, bitRate=%u, duration=%u ms", videoInfo.width, videoInfo.height, videoInfo.codecId, videoInfo.frameRate, videoInfo.bitRate, videoInfo.duration);
     }
-
-    // configure data source
-    XADataLocator_AndroidBufferQueue loc_abq = { XA_DATALOCATOR_ANDROIDBUFFERQUEUE, NB_BUFFERS };
-    XADataFormat_MIME format_mime = {
-            XA_DATAFORMAT_MIME, XA_ANDROID_MIME_MP2TS, XA_CONTAINERTYPE_MPEG_TS };
-    XADataSource dataSrc = {&loc_abq, &format_mime};
-
-    // configure audio sink
-    XADataLocator_OutputMix loc_outmix = { XA_DATALOCATOR_OUTPUTMIX, outputMixObject };
-    XADataSink audioSnk = { &loc_outmix, NULL };
-
-    // configure image video sink
-    XADataLocator_NativeDisplay loc_nd = {
-            XA_DATALOCATOR_NATIVEDISPLAY,        // locatorType
-            // the video sink must be an ANativeWindow created from a Surface or SurfaceTexture
-            (void*)theNativeWindow,              // hWindow
-            // must be NULL
-            NULL                                 // hDisplay
-    };
-    XADataSink imageVideoSink = {&loc_nd, NULL};
-
-    // declare interfaces to use
-    XAboolean     required[NB_MAXAL_INTERFACES]
-                           = {XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE,           XA_BOOLEAN_TRUE};
-    XAInterfaceID iidArray[NB_MAXAL_INTERFACES]
-                           = {XA_IID_PLAY,     XA_IID_ANDROIDBUFFERQUEUESOURCE,
-                                               XA_IID_STREAMINFORMATION};
-
-    // create media player
-    res = (*engineEngine)->CreateMediaPlayer(engineEngine, &playerObj, &dataSrc,
-            NULL, &audioSnk, &imageVideoSink, NULL, NULL,
-            NB_MAXAL_INTERFACES /*XAuint32 numInterfaces*/,
-            iidArray /*const XAInterfaceID *pInterfaceIds*/,
-            required /*const XAboolean *pInterfaceRequired*/);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // release the Java string and UTF-8
-    (*env)->ReleaseStringUTFChars(env, filename, utf8);
-
-    // realize the player
-    res = (*playerObj)->Realize(playerObj, XA_BOOLEAN_FALSE);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // get the play interface
-    res = (*playerObj)->GetInterface(playerObj, XA_IID_PLAY, &playerPlayItf);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // get the stream information interface (for video size)
-    res = (*playerObj)->GetInterface(playerObj, XA_IID_STREAMINFORMATION, &playerStreamInfoItf);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // get the volume interface
-    res = (*playerObj)->GetInterface(playerObj, XA_IID_VOLUME, &playerVolItf);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // get the Android buffer queue interface
-    res = (*playerObj)->GetInterface(playerObj, XA_IID_ANDROIDBUFFERQUEUESOURCE, &playerBQItf);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // specify which events we want to be notified of
-    res = (*playerBQItf)->SetCallbackEventsMask(playerBQItf, XA_ANDROIDBUFFERQUEUEEVENT_PROCESSED);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // register the callback from which OpenMAX AL can retrieve the data to play
-    res = (*playerBQItf)->RegisterCallback(playerBQItf, AndroidBufferQueueCallback, NULL);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // we want to be notified of the video size once it's found, so we register a callback for that
-    res = (*playerStreamInfoItf)->RegisterStreamChangeCallback(playerStreamInfoItf,
-            StreamChangeCallback, NULL);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // enqueue the initial buffers
-    if (!enqueueInitialBuffers(JNI_FALSE)) {
-        return JNI_FALSE;
+      break;
+    default:
+      fprintf(stderr, "Unexpected domain %u\n", domain);
+      break;
     }
-
-    // prepare the player
-    res = (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PAUSED);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // set the volume
-    res = (*playerVolItf)->SetVolumeLevel(playerVolItf, 0);
-    assert(XA_RESULT_SUCCESS == res);
-
-    // start the playback
-    res = (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PLAYING);
-        assert(XA_RESULT_SUCCESS == res);
-
-    return JNI_TRUE;
+  }
+    break;
+  default:
+    fprintf(stderr, "Unexpected stream event ID %u\n", eventId);
+    break;
+  }
 }
 
+// engineとoutput mixを生成する
+void createEngine(JNIEnv* env, jclass clazz) {
+  // engineを生成する
+  xaCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
+  // engineを実体化する
+  (*engineObject)->Realize(engineObject, XA_BOOLEAN_FALSE);
+  // engineインターフェイスやそれに関連するインターフェイスを取得する
+  (*engineObject)->GetInterface(engineObject, XA_IID_ENGINE,
+                                      &engineEngine);
 
-// set the playing state for the streaming media player
-void setPlayingStreamingMediaPlayer(JNIEnv* env,
-        jclass clazz, jboolean isPlaying)
-{
-    XAresult res;
-
-    // make sure the streaming media player was created
-    if (NULL != playerPlayItf) {
-
-        // set the player's state
-        res = (*playerPlayItf)->SetPlayState(playerPlayItf, isPlaying ?
-            XA_PLAYSTATE_PLAYING : XA_PLAYSTATE_PAUSED);
-        assert(XA_RESULT_SUCCESS == res);
-
-    }
-
+  // outout mixを生成する
+  (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0,
+                                         NULL, NULL);
+  // output mixを実体化する
+  (*outputMixObject)->Realize(outputMixObject, XA_BOOLEAN_FALSE);
 }
 
+// 初期バッファをキューに貯めこむ
+static jboolean enqueueInitialBuffers(jboolean discontinuity) {
 
-// shut down the native media system
-void shutdown(JNIEnv* env, jclass clazz)
-{
-    // destroy streaming media player object, and invalidate all associated interfaces
-    if (playerObj != NULL) {
-        (*playerObj)->Destroy(playerObj);
-        playerObj = NULL;
-        playerPlayItf = NULL;
-        playerBQItf = NULL;
-        playerStreamInfoItf = NULL;
-        playerVolItf = NULL;
-    }
+  /* キャッシュを満たす
+   * 全体のパケット（MPEG2_TS_PACKET_SIZEの整数倍）を読み込む。
+   * freadは、バイト数ではなく要素の数をかえす。要素の数はパケットサイズの倍数であるかチェックする必要がある。
+   */
+  size_t bytesRead;
+  bytesRead = fread(dataCache, 1, BUFFER_SIZE * NB_BUFFERS, file);
+  if (bytesRead <= 0) {
+    // 早まったEOFか、I/Oエラーである
+    return JNI_FALSE;
+  }
+  if ((bytesRead % MPEG2_TS_PACKET_SIZE) != 0) {
+    LOGV("Dropping last packet because it is not whole");
+  }
+  size_t packetsRead = bytesRead / MPEG2_TS_PACKET_SIZE;
+  LOGV("Initially queueing %u packets", packetsRead);
 
-    // Output mixオブジェクトを破棄する。あわせて関連するインターフェイスを無効化する
-    if (outputMixObject != NULL) {
-        (*outputMixObject)->Destroy(outputMixObject);
-        outputMixObject = NULL;
+  // 再生前に、キャッシュにコンテントをキューに貯めこむ
+  size_t i;
+  for (i = 0; i < NB_BUFFERS && packetsRead > 0; i++) {
+    // このバッファのサイズを計算する
+    size_t packetsThisBuffer = packetsRead;
+    if (packetsThisBuffer > PACKETS_PER_BUFFER) {
+      packetsThisBuffer = PACKETS_PER_BUFFER;
     }
+    size_t bufferSize = packetsThisBuffer * MPEG2_TS_PACKET_SIZE;
+    if (discontinuity) {
+      // 再生中断のシグナル
+      XAAndroidBufferItem items[1];
+      items[0].itemKey = XA_ANDROID_ITEMKEY_DISCONTINUITY;
+      items[0].itemSize = 0;
+      // DISCONTINUITYメッセージはパラメータを持たない。
+      // メッセージのサイズは、keyとitemSizesの合計（どちらもXAuint32型）
+      (*playerBQItf)->Enqueue(playerBQItf, 
+                              NULL /*pBufferContext*/,
+                              dataCache + i * BUFFER_SIZE, 
+                              bufferSize,
+                              items /*pMsg*/,
+                              sizeof(XAuint32) * 2 /*msgLength*/);
+      discontinuity = JNI_FALSE;
+    } else {
+      (*playerBQItf)->Enqueue(playerBQItf, 
+                              NULL /*pBufferContext*/,
+                              dataCache + i * BUFFER_SIZE, 
+                              bufferSize,
+                              NULL, 
+                              0);
+    }
+    packetsRead -= packetsThisBuffer;
+  }
 
-    // engineを破棄する。あわせて関連するインターフェイスも無効化する
-    if (engineObject != NULL) {
-        (*engineObject)->Destroy(engineObject);
-        engineObject = NULL;
-        engineEngine = NULL;
-    }
-
-    // ファイルを閉じる
-    if (file != NULL) {
-        fclose(file);
-        file = NULL;
-    }
-
-    // make sure we don't leak native windows
-    if (theNativeWindow != NULL) {
-        ANativeWindow_release(theNativeWindow);
-        theNativeWindow = NULL;
-    }
+  return JNI_TRUE;
 }
 
+// ストリーミングメディアプレイヤーを生成する
+jboolean createStreamingMediaPlayer(JNIEnv* env, jclass clazz, jstring filename) {
+  XAresult res;
 
-// サーフェイスを設定する
-void setSurface(JNIEnv *env, jclass clazz, jobject surface)
-{
-  // Javaのサーフェイスを元にネイティブウィンドウを取り出す
+  // Javaの文字列を変換する
+  const char *utf8 = (*env)->GetStringUTFChars(env, filename, NULL);
+
+  // 再生するファイルを開く
+  file = fopen(utf8, "rb");
+  if (file == NULL) {
+    return JNI_FALSE;
+  }
+
+  // データソースを指定する
+  XADataLocator_AndroidBufferQueue loc_abq = {
+      XA_DATALOCATOR_ANDROIDBUFFERQUEUE, NB_BUFFERS };
+  XADataFormat_MIME format_mime = {
+      XA_DATAFORMAT_MIME,
+      XA_ANDROID_MIME_MP2TS,
+      XA_CONTAINERTYPE_MPEG_TS };
+  XADataSource dataSrc = { &loc_abq, &format_mime };
+
+  // オーディオシンクを構築する
+  XADataLocator_OutputMix loc_outmix = {
+      XA_DATALOCATOR_OUTPUTMIX,outputMixObject };
+  XADataSink audioSnk = { &loc_outmix, NULL };
+
+  // イメージビデオシンクを構築する
+  // ビデオシンクは、SurfaceかSurfaceTextureから生成されたANativeWindowであること
+  XADataLocator_NativeDisplay loc_nd = {
+    XA_DATALOCATOR_NATIVEDISPLAY,
+    (void*) theNativeWindow,
+    NULL // 必ずNULL
+  };
+  XADataSink imageVideoSink = { &loc_nd, NULL };
+
+  // インターフェイスの使い方を宣言する
+  XAboolean required[NB_MAXAL_INTERFACES] = {
+    XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE};
+  XAInterfaceID iidArray[NB_MAXAL_INTERFACES] = {
+    XA_IID_PLAY, XA_IID_ANDROIDBUFFERQUEUESOURCE, XA_IID_STREAMINFORMATION };
+
+  // メディアプレイヤーを生成する
+  (*engineEngine)->CreateMediaPlayer(
+      engineEngine, &playerObj, &dataSrc, NULL, &audioSnk, &imageVideoSink,
+      NULL, NULL, 
+      NB_MAXAL_INTERFACES /*XAuint32 numInterfaces*/,
+      iidArray /*const XAInterfaceID *pInterfaceIds*/,
+      required /*const XAboolean *pInterfaceRequired*/);
+
+  // Java,UTF-8文字列を解放する
+  (*env)->ReleaseStringUTFChars(env, filename, utf8);
+
+  // メディアプレイヤーを実体化する
+  (*playerObj)->Realize(playerObj, XA_BOOLEAN_FALSE);
+
+  // playerインターフェイスを取得する
+  (*playerObj)->GetInterface(playerObj, XA_IID_PLAY, &playerPlayItf);
+
+  // ストリーム情報インターフェイスを取得する（ビデオサイズ取得のため）
+  (*playerObj)->GetInterface(playerObj, XA_IID_STREAMINFORMATION,
+                                   &playerStreamInfoItf);
+
+  // ボリュームインターフェイスを取得する
+  (*playerObj)->GetInterface(playerObj, XA_IID_VOLUME, &playerVolItf);
+
+  // Androidバッファキューインターフェイスを取得する
+  (*playerObj)->GetInterface(playerObj, XA_IID_ANDROIDBUFFERQUEUESOURCE,
+                                   &playerBQItf);
+
+  // 発生して欲しいイベントセットする
+  (*playerBQItf)->SetCallbackEventsMask(
+      playerBQItf, XA_ANDROIDBUFFERQUEUEEVENT_PROCESSED);
+
+  //　OpenMAX ALが再生するためのデータを読み出すためにコールバックを登録する
+  (*playerBQItf)->RegisterCallback(playerBQItf,
+                                         AndroidBufferQueueCallback, NULL);
+
+  // コールバックの登録をする（再生時間などの動画情報を取得するため）
+  (*playerStreamInfoItf)->RegisterStreamChangeCallback(
+      playerStreamInfoItf, StreamChangeCallback, NULL);
+
+  // 初期バッファをキューに貯めこむ
+  if (!enqueueInitialBuffers(JNI_FALSE)) {
+    return JNI_FALSE;
+  }
+
+  // プレイヤーの準備をする
+  (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PAUSED);
+
+  // 音量をセットする
+  (*playerVolItf)->SetVolumeLevel(playerVolItf, 0);
+
+  // 再生開始
+  (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PLAYING);
+
+  return JNI_TRUE;
+}
+
+// ストリーミングメディアプレイヤーのプレイ状態をセットする
+void setPlayingStreamingMediaPlayer(JNIEnv* env, jclass clazz,
+                                    jboolean isPlaying) {
+  XAresult res;
+  // ストリーミングメディアプレイヤーが生成されているかチェック
+  if (NULL != playerPlayItf) {
+    // プレイ状態をセットする
+    res = (*playerPlayItf)->SetPlayState(
+      playerPlayItf, isPlaying ? XA_PLAYSTATE_PLAYING : XA_PLAYSTATE_PAUSED);
+  }
+}
+
+// ネイティブメディアシステムを終了する
+void shutdown(JNIEnv* env, jclass clazz) {
+
+  // streaming media playerオブジェクトの破棄と、関連する変数を無効化する
+  if (playerObj != NULL) {
+    (*playerObj)->Destroy(playerObj);
+    playerObj = NULL;
+    playerPlayItf = NULL;
+    playerBQItf = NULL;
+    playerStreamInfoItf = NULL;
+    playerVolItf = NULL;
+  }
+
+  // output mixオブジェクトの破棄と、関連する変数を無効化する
+  if (outputMixObject != NULL) {
+    (*outputMixObject)->Destroy(outputMixObject);
+    outputMixObject = NULL;
+  }
+
+  // engineオブジェクトの破棄と、関連する変数を無効化する
+  if (engineObject != NULL) {
+    (*engineObject)->Destroy(engineObject);
+    engineObject = NULL;
+    engineEngine = NULL;
+  }
+
+  // ファイルを閉じる
+  if (file != NULL) {
+    fclose(file);
+    file = NULL;
+  }
+
+  // NativeWindowを解放する
+  if (theNativeWindow != NULL) {
+    ANativeWindow_release(theNativeWindow);
+    theNativeWindow = NULL;
+  }
+}
+
+// サーフェイスをセットする
+void setSurface(JNIEnv *env, jclass clazz, jobject surface) {
+  // JavaのサーフェイスからNativeWindowを取得する
   theNativeWindow = ANativeWindow_fromSurface(env, surface);
 }
 
+//  ストリーミングメディアプレイヤーを巻き戻す
+void rewindStreamingMediaPlayer(JNIEnv *env, jclass clazz) {
+  XAresult res;
 
-// ストリーミングメディアプレイヤーを巻き戻す
-void rewindStreamingMediaPlayer(JNIEnv *env, jclass clazz)
-{
-    XAresult res;
+  // ストリーミングメディアプレイヤーが生成済であるかチェックする
+  if (NULL != playerBQItf && NULL != file) {
+    // 現在のキューがカラになるのを待つ
+    pthread_mutex_lock(&mutex);
+    discontinuity = JNI_TRUE;
 
-    // make sure the streaming media player was created
-    if (NULL != playerBQItf && NULL != file) {
-        // first wait for buffers currently in queue to be drained
-        int ok;
-        ok = pthread_mutex_lock(&mutex);
-        assert(0 == ok);
-        discontinuity = JNI_TRUE;
-        // wait for discontinuity request to be observed by buffer queue callback
-        // Note: can't rewind after EOS, which we send when reaching EOF
-        // (don't send EOS if you plan to play more content through the same player)
-        while (discontinuity && !reachedEof) {
-            ok = pthread_cond_wait(&cond, &mutex);
-            assert(0 == ok);
-        }
-        ok = pthread_mutex_unlock(&mutex);
-        assert(0 == ok);
+    // バッファーキューコールバックを監視するために再生中断リクエストを待つ
+    while (discontinuity && !reachedEof) {
+      pthread_cond_wait(&cond, &mutex);
     }
-
+    pthread_mutex_unlock(&mutex);
+  }
 }
 
 static JNINativeMethod sMethods[] = {
-     /* name, signature, funcPtr */
-    {"createEngine", "()V", (void*)createEngine},
-    {"setSurface", "(Landroid/view/Surface;)V", (void*)setSurface},
-    {"createStreamingMediaPlayer", "(Ljava/lang/String;)Z", (void*)createStreamingMediaPlayer},
-    {"rewindStreamingMediaPlayer", "()V", (void*)rewindStreamingMediaPlayer},
-    {"shutdown", "()V", (void*)shutdown},
-    {"setPlayingStreamingMediaPlayer", "(Z)V", (void*)setPlayingStreamingMediaPlayer},
+{ "createEngine", "()V",                       
+  (void*) createEngine },
+{ "setSurface",   "(Landroid/view/Surface;)V", 
+  (void*) setSurface },
+{ "createStreamingMediaPlayer", "(Ljava/lang/String;)Z", 
+  (void*) createStreamingMediaPlayer },
+{ "rewindStreamingMediaPlayer", "()V",    
+  (void*) rewindStreamingMediaPlayer },
+{ "shutdown", "()V", 
+  (void*) shutdown },
+{ "setPlayingStreamingMediaPlayer","(Z)V", 
+  (void*) setPlayingStreamingMediaPlayer },
 };
 
+jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+  JNIEnv* env = NULL;
+  jint result = -1;
 
- jint JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-    JNIEnv* env = NULL;
-    jint result = -1;
-
-	if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_6) != JNI_OK) {
-        return result;
-    }
-
-    jniRegisterNativeMethods(env, "com/example/nativemediaplayer/MainActivity", sMethods, NELEM(sMethods));
-    return JNI_VERSION_1_6;
+  if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_6) != JNI_OK) {
+    return result;
+  }
+  jniRegisterNativeMethods(env, "com/example/nativemediaplayer/MainActivity",
+                           sMethods, NELEM(sMethods));
+  return JNI_VERSION_1_6;
 }
 

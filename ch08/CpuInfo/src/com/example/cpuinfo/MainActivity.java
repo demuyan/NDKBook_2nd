@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    // 加算する（nativeをつけることでJNIで処理することを宣言する)
+    // CPU情報を取得する
     protected native String getCpuInfo();
 
     // あらかじめロードするモジュールを指定
