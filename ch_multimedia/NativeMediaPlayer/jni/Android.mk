@@ -5,11 +5,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := movieplayer-jni
 LOCAL_SRC_FILES := main.c jnihelper.c
-LOCAL_LDLIBS    += -llog \
-                   -lOpenMAXAL #/////-----(1)
-                   -landroid   #/////-----(2)
-
-LOCAL_CFLAGS    += -UNDEBUG
+LOCAL_LDLIBS    += -llog 
+LOCAL_LDLIBS    += -lOpenMAXAL  #/////=====(1)
+LOCAL_LDLIBS    += -landroid    #/////======(2)
 
 include $(BUILD_SHARED_LIBRARY)
 #//////end

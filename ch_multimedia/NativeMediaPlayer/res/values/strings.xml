@@ -3,7 +3,7 @@
     <string name="app_name">NativeMediaPlayer</string>
     <string name="title_activity_main">NativeMediaPlayer</string>
     <string name="menu_settings">Settings</string>
-    <string name="start">Start</string>
+    <string name="start">Start/Stop</string>
     <string name="rewind">Rewind</string>
     <string name="source_select">Please select the media source</string>
     <string name="source_prompt">Media source</string>

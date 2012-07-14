@@ -27,8 +27,8 @@
 
     <SurfaceView
         android:id="@+id/surfaceview1"
-        android:layout_width="320px"
-        android:layout_height="240px"
+        android:layout_width="640px"
+        android:layout_height="480px"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/start_btn"
         android:layout_marginTop="28dp" />
