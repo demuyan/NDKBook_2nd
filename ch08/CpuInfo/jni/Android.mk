@@ -1,4 +1,4 @@
-#/////begin ch08-samplecode-4
+#/////begin ch08_samplecode_4
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)

@@ -1,7 +1,7 @@
 #include <jni.h>
 #include <cpu-features.h>
 
-/////begin ch08-samplecode-1
+/////begin ch08_samplecode_1
 // 利用しているCPUアーキテクチャを判別する
 AndroidCpuFamily getCpuArch(char* cpuinfo){
 
@@ -24,7 +24,7 @@ AndroidCpuFamily getCpuArch(char* cpuinfo){
   return cpuFamily;
 }
 /////end
-/////begin ch08-samplecode-2
+/////begin ch08_samplecode_2
 // 利用しているARMアーキテクチャの機能詳細を取得
 void getArmInfo(char* cpuinfo){
 
@@ -47,7 +47,7 @@ void getArmInfo(char* cpuinfo){
     strcat(cpuinfo, "LDREX_STREX ");
 }
 /////end
-/////begin ch08-samplecode-3
+/////begin ch08_samplecode_3
 // 利用しているx86アーキテクチャの機能詳細を取得
 void getX86Info(char* cpuinfo){
 

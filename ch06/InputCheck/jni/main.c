@@ -11,8 +11,9 @@
 
 #include <fonttexture.h>
 #include <glyphpos.h>
-
-#include <android/sensor.h>
+/////begin ch06_samplecode_4_02
+#include <android/sensor.h> /////-----(1)
+/////end 
 #include <android/log.h>
 #include <android_native_app_glue.h>
 #include <android/input.h>
@@ -26,7 +27,6 @@
 #define FALSE (0)
 #endif
 
-#define SENSOR_MAX (5)
 
 // デバッグ用メッセージ
 #define TAG "InputCheck"
@@ -47,21 +47,21 @@ struct saved_state {
   float angle;
 };
 
+/////begin ch06_samplecode_4_01
+#define SENSOR_MAX (5)
 // センサー
 typedef struct _sensor_type {
-  const ASensor* sensor;
+  const ASensor* sensor;   /////-----(4)センサーのデータ格納
   int   type;
   ASensorVector value;
 } sensor_type;
-
-/////begin ch06_samplecode_4
 // アプリケーション内で共通して利用する情報
 struct engine {
 
   // センサー関連
-  ASensorManager* sensorManager; // センサーマネージャ            -----(1)
-  ASensorEventQueue* sensorEventQueue; // センサーイベントキュー  -----(2)
-  sensor_type sensors[SENSOR_MAX];
+  ASensorManager* sensorManager; // センサーマネージャ            /////-----(2)
+  ASensorEventQueue* sensorEventQueue; // センサーイベントキュー  /////-----(3)
+  sensor_type sensors[SENSOR_MAX];    
 /////end
   struct android_app* app;
   // アニメーションフラグ
@@ -288,10 +288,10 @@ void displaySensors(struct engine* engine) {
   char buf[1024];
   char message[][50] = {
        "",
-      "SENSOR ACCEL:(%2.3f,%2.3f,%2.3f)",
-      "SENSOR MAGNETICFIELD:(%2.3f,%2.3f,%2.3f)",
+      "SENSOR ACCEL:(%+2.3f,%+2.3f,%+2.3f)",
+      "SENSOR MAGNETICFIELD:(%+2.3f,%+2.3f,%+2.3f)",
        "",
-      "SENSOR GYROSCOPE:(%2.3f,%2.3f,%2.3f)",
+      "SENSOR GYROSCOPE:(%+2.3f,%+2.3f,%+2.3f)",
       "SENSOR LIGHT:(%2.3f)",
        "",
        "",
@@ -322,40 +322,79 @@ void displayKeys(struct engine* engine) {
   sprintf(buf, "VOLUMEDOWN = %s", engine->volumedown_keydown ? "DOWN" : "UP");
   RenderString(engine->width / 2 + 64, engine->height - 32 - y, buf);
 }
-//////begin ch06_samplecode_8
+//////begin ch06_samplecode_11
 // Configurationを表示する
 void displayConfiguration(struct engine* engine) {
   int idx = 0;
+  // 画面の向き
   const char orientation_list[][32] = {
-      "ORIENTATION_ANY",   "ORIENTATION_PORT",
-      "ORIENTATION_LAND",  "ORIENTATION_SQUARE" };
+      "ORIENTATION_ANY",   // 未定義
+      "ORIENTATION_PORT",  // Portrait
+      "ORIENTATION_LAND",  // Landcape
+      "ORIENTATION_SQUARE" // Square
+      };
+  // タッチスクリーン
   const char touchscreen_list[][32] = {
-      "TOUCHSCREEN_ANY",   "TOUCHSCREEN_NOTOUCH",
-      "TOUCHSCREEN_STYLUS","TOUCHSCREEN_FINGER" };
-  const char density_list[][32] = {
-      "DENSITY_DEFAULT", "DENSITY_LOW", "DENSITY_MEDIUM",
-      "DENSITY_HIGH",    "DENSITY_NONE" };
+      "TOUCHSCREEN_ANY",    // 未定義
+      "TOUCHSCREEN_NOTOUCH",// タッチスクリーンではない
+      "TOUCHSCREEN_STYLUS", // (廃止)
+      "TOUCHSCREEN_FINGER"  // タッチスクリーン
+  };
+  // キーボード
   const char keyboard_list[][32] = {
-      "KEYBOARD_ANY",    "KEYBOARD_NOKEYS",
-      "KEYBOARD_QWERTY", "KEYBOARD_12KEY" };
+      "KEYBOARD_ANY",    // 未定義
+      "KEYBOARD_NOKEYS", // キーはない
+      "KEYBOARD_QWERTY", // QWERTY配列
+      "KEYBOARD_12KEY"   // 12キー
+  };
+  // ナビゲーション
   const char navigation_list[][32] = {
-      "NAVIGATION_ANY",       "NAVIGATION_NONAV", "NAVIGATION_DPAD",
-      "NAVIGATION_TRACKBALL", "NAVIGATION_WHEEL" };
+      "NAVIGATION_ANY",   // 未定義
+      "NAVIGATION_NONAV", // なし
+      "NAVIGATION_DPAD",  // DPAD
+      "NAVIGATION_TRACKBALL", // トラックボール
+      "NAVIGATION_WHEEL"  // ホイール
+  };
+  // ソフトウェアキーボード
   const char keyshidden_list[][32] = {
-      "KEYSHIDDEN_ANY", "KEYSHIDDEN_NO",
-      "KEYSHIDDEN_YES", "KEYSHIDDEN_SOFT" };
+      "KEYSHIDDEN_ANY", // 未定義
+      "KEYSHIDDEN_NO",  // キーボードを隠すことができない
+      "KEYSHIDDEN_YES", // キーボードを隠すことができる
+      "KEYSHIDDEN_SOFT" // ソフト制御
+  };
+  // ナビゲーションキーの隠し方
   const char navhidden_list[][32] = {
-      "NAVHIDDEN_ANY", "NAVHIDDEN_NO", "NAVHIDDEN_YES" };
+      "NAVHIDDEN_ANY", // 未定義
+      "NAVHIDDEN_NO",  // ナビゲーションキーを隠すことができる
+      "NAVHIDDEN_YES"  // ナビゲーションキーを隠すことができない
+  };
+  // 画面サイズ
   const char screensize_list[][32] = {
-      "SCREENSIZE_ANY",   "SCREENSIZE_SMALL", "SCREENSIZE_NORMAL",
-      "SCREENSIZE_LARGE", "SCREENSIZE_XLARGE" };
+      "SCREENSIZE_ANY",    // 未定義
+      "SCREENSIZE_SMALL",  // 小さい
+      "SCREENSIZE_NORMAL", // 標準
+      "SCREENSIZE_LARGE",  // 大きい
+      "SCREENSIZE_XLARGE"  // 特大
+  };
+  // ワイドスクリーンか
   const char screenlong_list[][32] = {
-      "SCREENLONG_ANY",   "SCREENLONG_NO",      "SCREENLONG_YES", };
+      "SCREENLONG_ANY",  // 未定義
+      "SCREENLONG_NO",   // ワイドではない（QVGA,HVGA,VGAなど)
+      "SCREENLONG_YES",  // ワイドである(WQVGA,WVGA,FWVGAなど)
+  };
+  // 接続状態
   const char uimodetype_list[][32] = {
-      "UI_MODE_TYPE_ANY", "UI_MODE_TYPE_NORMAL","UI_MODE_TYPE_DESK",
-      "UI_MODE_TYPE_CAR" };
+      "UI_MODE_TYPE_ANY",    // 未定義
+      "UI_MODE_TYPE_NORMAL", // 標準
+      "UI_MODE_TYPE_DESK",   // DeskDocに接続中
+      "UI_MODE_TYPE_CAR"     // CarDocに接続中
+  };
+  // UIモード（夜）タイプ
   const char uimodenight_list[][32] = {
-      "UI_MODE_NIGHT_ANY", "UI_MODE_NIGHT_NO", "UI_MODE_NIGHT_YES" };
+      "UI_MODE_NIGHT_ANY", // 未定義
+      "UI_MODE_NIGHT_NO",  // 昼モード
+      "UI_MODE_NIGHT_YES"  // 夜モード
+  };
 
   // 言語を取得(２文字が返る)
   char language[3] = { 0 };
@@ -365,7 +404,7 @@ void displayConfiguration(struct engine* engine) {
   char country[3] = { 0 };
   AConfiguration_getCountry(engine->app->config, country);
   LOGI("Country:%s", country);
-  // 画面の向きを取得
+  // 画面の向き
   idx = AConfiguration_getOrientation(engine->app->config);
   LOGI("Orientation:%s", orientation_list[idx]);
   // タッチスクリーン
@@ -383,7 +422,7 @@ void displayConfiguration(struct engine* engine) {
   // キーの隠し方
   idx = AConfiguration_getKeysHidden(engine->app->config);
   LOGI("KeysHidden:%s", keyshidden_list[idx]);
-  // ナビゲーションの隠し方
+  // ナビゲーションキーの隠し方
   idx = AConfiguration_getNavHidden(engine->app->config);
   LOGI("NaviHidden:%s", navhidden_list[idx]);
   // SDK(API)バージョン
@@ -392,7 +431,7 @@ void displayConfiguration(struct engine* engine) {
   // スクリーンサイズ
   idx = AConfiguration_getScreenSize(engine->app->config);
   LOGI("ScreenSize:%s", screensize_list[idx]);
-  // スクリーンロング
+  // ワイドスクリーンか
   idx = AConfiguration_getScreenLong(engine->app->config);
   LOGI("ScreenLong:%s", screenlong_list[idx]);
   // UIモードタイプ
@@ -455,7 +494,7 @@ static void engine_term_display(struct engine* engine) {
 
 /////begin ch06_samplecode_2
 ///// タッチイベント処理
-void getTouchPosition(struct android_app* app, AInputEvent* event) {
+void get_touch_position(struct android_app* app, AInputEvent* event) {
   struct engine* engine = (struct engine*) app->userData;
 // タッチの状態を取得する
   int32_t action = AMotionEvent_getAction(event); /////------(1)
@@ -478,7 +517,7 @@ void getTouchPosition(struct android_app* app, AInputEvent* event) {
 /////end
 /////begin ch06_samplecode_3
 ///// キー入力イベント処理
-void getKeyEvent(struct android_app* app, AInputEvent* event) {
+void get_key_event(struct android_app* app, AInputEvent* event) {
   struct engine* engine = (struct engine*) app->userData;
   int keyaction;
   // キーコードを取得
@@ -516,45 +555,80 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
   int type = AInputEvent_getType(event); //////-----(1)
   if (type == AINPUT_EVENT_TYPE_MOTION) {
     ///// タッチイベント処理
-    getTouchPosition(app, event);
+    get_touch_position(app, event);
     engine->animating = 1;
   } else if (type == AINPUT_EVENT_TYPE_KEY) {
     ///// キー入力イベント処理
-    getKeyEvent(app, event);
+    get_key_event(app, event);
     return 1; //////-----(2)
   }
   return 0;
 }
 /////end
-/////begin ch06_samplecode_6
-// センサーを有効化する
-void enableSensors(struct engine* engine) {
-	int i;
+/////begin ch06_samplecode_5
+//センサーの初期化
+void init_sensors(struct engine* engine,struct android_app* state) {
+  // センサーマネージャの取得
+  ASensorList list;
+  int sensor_list[] = {
+      ASENSOR_TYPE_ACCELEROMETER, ASENSOR_TYPE_MAGNETIC_FIELD,
+      ASENSOR_TYPE_GYROSCOPE, ASENSOR_TYPE_LIGHT, ASENSOR_TYPE_PROXIMITY };
+  engine->sensorManager = ASensorManager_getInstance(); /////-----(1)
+  // 利用可能なセンサーの一覧を取得
+  int num = ASensorManager_getSensorList(engine->sensorManager, &list); /////-----(2)
+  int i, j;
+  // バッファの初期化
+  for (i = 0; i < SENSOR_MAX; i++) {
+    engine->sensors[i].sensor = NULL;
+    engine->sensors[i].type = sensor_list[i];
+  }
+  // センサーのデータ取得準備
+  for (i = 0; i < num; i++) {
+    ASensorRef sensor = list[i];
+    int type = ASensor_getType(sensor); // センサーのTYPEを取得   /////-----(3)
+    LOGI("type=%d sensor=%s", type, ASensor_getName(sensor));
+    // センサーから値を取得できるようにする
+    for (j = 0; j < SENSOR_MAX; j++) {
+      if ((type == engine->sensors[j].type) && (engine->sensors[j].sensor == NULL)) {
+        engine->sensors[j].sensor = ASensorManager_getDefaultSensor(   /////-----(4)    
+            engine->sensorManager, type);
+        break;
+      }
+    }
+  }    
+  // センサー情報取得キューの新規作成
+  engine->sensorEventQueue = ASensorManager_createEventQueue( /////-----(5)
+      engine->sensorManager, state->looper, LOOPER_ID_USER, NULL, NULL);
+}
+/////end
 
-	for (i = 0; i < SENSOR_MAX; i++){
-		sensor_type* st = &engine->sensors[i];
-		if (st->sensor != NULL){
-		    ASensorEventQueue_enableSensor(engine->sensorEventQueue,
-		    		st->sensor);
-		    // センサーから値を取得する周期を設定する
-		    ASensorEventQueue_setEventRate(engine->sensorEventQueue,
-		    		st->sensor,
-		                                   (1000L / 60) * 1000);
-		}
-	}
+/////begin ch06_samplecode_6
+// センサーからの値取得を許可する
+void enable_sensors(struct engine* engine) {
+  int i;
+
+  for (i = 0; i < SENSOR_MAX; i++) {
+    sensor_type* st = &engine->sensors[i];
+    if (st->sensor != NULL) {
+      ASensorEventQueue_enableSensor(engine->sensorEventQueue, /////-----(1)
+          st->sensor);
+      // 値を取得する周期を設定する
+      ASensorEventQueue_setEventRate(engine->sensorEventQueue, /////-----(2)
+          st->sensor, (1000L / 60) * 1000);
+    }
+  }
 }
 /////end
 /////begin ch06_samplecode_7
-// センサーを無効化する
-void disableSensors(struct engine* engine) {
-  // 加速度センサーを無効化する
-	int i;
-	for (i = 0; i < SENSOR_MAX; i++){
-		if (engine->sensors[i].sensor != NULL){
-		    ASensorEventQueue_disableSensor(engine->sensorEventQueue, /////-----(1)
-		    		engine->sensors[i].sensor);
-		}
-	}
+// センサーからの値取得を不許可にする
+void disable_sensors(struct engine* engine) {
+  int i;
+  for (i = 0; i < SENSOR_MAX; i++) {
+    if (engine->sensors[i].sensor != NULL) {
+      ASensorEventQueue_disableSensor(engine->sensorEventQueue, /////-----(1)
+          engine->sensors[i].sensor);
+    }
+  }
 }
 /////end
 
@@ -582,11 +656,11 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     engine_term_display(engine);
     break;
   case APP_CMD_GAINED_FOCUS: // アプリがフォーカスを取得したとき
-    enableSensors(engine);
+    enable_sensors(engine);
     break;
 
   case APP_CMD_LOST_FOCUS: // フォーカスが消失したとき
-    disableSensors(engine);
+    disable_sensors(engine);
     // アニメーション停止
     engine->animating = 0;
     // 画面を表示
@@ -611,41 +685,10 @@ void android_main(struct android_app* state) {
   // 入力イベント処理関数の設定
   state->onInputEvent = engine_handle_input;
   engine.app = state;
-/////begin ch06_samplecode_5
-  // センサーマネージャの取得
-  ASensorList list;
-  int sensor_list[] = {
-      ASENSOR_TYPE_ACCELEROMETER, ASENSOR_TYPE_MAGNETIC_FIELD,
-      ASENSOR_TYPE_GYROSCOPE, ASENSOR_TYPE_LIGHT, ASENSOR_TYPE_PROXIMITY };
-  engine.sensorManager = ASensorManager_getInstance(); /////-----(1)
-  // 利用可能なセンサーの一覧を取得
-  int num = ASensorManager_getSensorList(engine.sensorManager, &list); /////-----(2)ここから
-  int i, j;
-  // バッファの初期化
-  for (i = 0; i < SENSOR_MAX; i++) {
-    engine.sensors[i].sensor = NULL;
-    engine.sensors[i].type = sensor_list[i];
-  }
 
-  // センサーのデータ取得準備
-  for (i = 0; i < num; i++) {
-    ASensorRef sensor = list[i];
-    int type = ASensor_getType(sensor); // センサーのTYPEを取得
-    LOGI("type=%d sensor=%s", type, ASensor_getName(sensor));
-    // センサーから値を取得できるようにする
-    for (j = 0; j < SENSOR_MAX; j++) {
-      if ((type == engine.sensors[j].type) && (engine.sensors[j].sensor == NULL)) {
-        engine.sensors[j].sensor = ASensorManager_getDefaultSensor(
-            engine.sensorManager, type);
-        break;
-      }
-    }
-  }    /////-----(2)ここまで
+  // センサーの初期化を行う
+  init_sensors(&engine, state);
 
-  // センサー情報取得キューの新規作成
-  engine.sensorEventQueue = ASensorManager_createEventQueue( /////-----(3)
-      engine.sensorManager, state->looper, LOOPER_ID_USER, NULL, NULL);
-/////end
   if (state->savedState != NULL) {
     // 以前の状態に戻す
     engine.state = *(struct saved_state*) state->savedState;
@@ -671,7 +714,7 @@ void android_main(struct android_app* state) {
       }
 
       // センサー情報取得キューのデータを処理する
-      if (ident == LOOPER_ID_USER) {
+      if (ident == LOOPER_ID_USER) {/////-----(2)
         ASensorEvent event[1];
         int count, i, j;
         while ((count = ASensorEventQueue_getEvents(engine.sensorEventQueue,
@@ -680,7 +723,7 @@ void android_main(struct android_app* state) {
             for (j = 0; j < SENSOR_MAX; j++) {
               if ((engine.sensors[j].sensor != NULL)
                   && (engine.sensors[j].type == event[i].type)) {
-                engine.sensors[j].value = event[i].vector;
+                engine.sensors[j].value = event[i].vector; /////-----(3)
               }
             }
           }
