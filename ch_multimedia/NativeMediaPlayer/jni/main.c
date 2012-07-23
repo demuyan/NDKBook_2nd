@@ -111,8 +111,8 @@ static XAresult AndroidBufferQueueCallback(XAAndroidBufferQueueItf caller,
 
   // freadは複数のスレッドから呼ばれるが、同時に行なってはならない
   size_t bytesRead;
-  bytesRead = fread(pBufferData, 1, BUFFER_SIZE, file); /////-----(3)
-  if (bytesRead > 0) { /////-----(4) ここから
+  bytesRead = fread(pBufferData, 1, BUFFER_SIZE, file); /////-----(3)ここから
+  if (bytesRead > 0) {
     if ((bytesRead % MPEG2_TS_PACKET_SIZE) != 0) { 
       LOGV("Dropping last packet because it is not whole");
     }
@@ -139,7 +139,7 @@ static XAresult AndroidBufferQueueCallback(XAAndroidBufferQueueItf caller,
                        msgEos /*pMsg*/,
                        sizeof(XAuint32) * 2 /*msgLength*/);
     reachedEof = JNI_TRUE;
-  } /////-----(4) ここから
+  } /////-----(3) ここまで
 
   exit: pthread_mutex_unlock(&mutex);
   return XA_RESULT_SUCCESS;
@@ -178,6 +178,7 @@ static void StreamChangeCallback(XAStreamInformationItf caller,
 }
 
 
+/////begin ch_multi_samplecode_7
 // 初期バッファをキューに貯めこむ
 static jboolean enqueueInitialBuffers(jboolean discontinuity) {
 
@@ -186,7 +187,7 @@ static jboolean enqueueInitialBuffers(jboolean discontinuity) {
    * freadは、バイト数ではなく要素の数をかえす。要素の数はパケットサイズの倍数であるかチェックする必要がある。
    */
   size_t bytesRead;
-  bytesRead = fread(dataCache, 1, BUFFER_SIZE * NB_BUFFERS, file);
+  bytesRead = fread(dataCache, 1, BUFFER_SIZE * NB_BUFFERS, file); /////-----(1)
   if (bytesRead <= 0) {
     // 早まったEOF(EndOfFile)か、I/Oエラーである
     return JNI_FALSE;
@@ -194,7 +195,7 @@ static jboolean enqueueInitialBuffers(jboolean discontinuity) {
   if ((bytesRead % MPEG2_TS_PACKET_SIZE) != 0) {
     LOGV("Dropping last packet because it is not whole");
   }
-  size_t packetsRead = bytesRead / MPEG2_TS_PACKET_SIZE;
+  size_t packetsRead = bytesRead / MPEG2_TS_PACKET_SIZE; /////-----(2)
   LOGV("Initially queueing %u packets", packetsRead);
 
   // 再生前に、キャッシュにコンテントをキューに貯めこむ
@@ -233,6 +234,7 @@ static jboolean enqueueInitialBuffers(jboolean discontinuity) {
 
   return JNI_TRUE;
 }
+/////end
 
 //  ストリーミングメディアプレイヤーを巻き戻す
 void rewindStreamingMediaPlayer(JNIEnv *env, jclass clazz) {
