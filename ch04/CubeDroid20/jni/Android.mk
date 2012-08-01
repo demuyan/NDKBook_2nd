@@ -1,4 +1,4 @@
-#/////begin gles20_samplecode_6
+#/////begin gles2_samplecode_6
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
