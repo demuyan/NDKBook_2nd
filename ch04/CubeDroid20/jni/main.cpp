@@ -16,7 +16,6 @@
 extern void initCube(struct engine* engine);
 extern void prepareFrame(struct engine* engine);
 extern void drawCube(struct engine* engine);
-
 /////begin gles20_samplecode_1
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
@@ -56,10 +55,10 @@ static int engine_init_display(struct engine* engine) {
   ANativeWindow_setBuffersGeometry(engine->app->window, 0, 0, format);
   // EGLウィンドウサーフェイスの取得
   surface = eglCreateWindowSurface(display, config, engine->app->window, NULL);
-  // レンダリングコンテキストをGLES20にする
-  const EGLint attrib_list[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE }; /////-----(2) ここから
   // EGLレンダリングコンテキストの取得
-  context = eglCreateContext(display, config, NULL, attrib_list); /////-----(2) ここまで
+  const EGLint attrib_list[] = { EGL_CONTEXT_CLIENT_VERSION, 2, // GLES|2.0を指定  /////-----(2) ここから
+                                 EGL_NONE }; 
+  context = eglCreateContext(display, config, NULL, attrib_list);                  /////-----(2) ここまで
   // EGLレンダリングコンテキストをEGLサーフェイスにアタッチする
   if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
     LOGW("Unable to eglMakeCurrent");
@@ -91,7 +90,6 @@ static int engine_init_display(struct engine* engine) {
   return 0;
 }
 /////end
-
 // 毎フレームの描画処理
 static void engine_draw_frame(struct engine* engine) {
 

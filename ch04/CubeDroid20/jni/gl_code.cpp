@@ -26,7 +26,6 @@ enum {
   NUM_ATTRIBUTES
 };
 
-
 // ログ出力
 static void printGLString(const char *name, GLenum s) {
   const char *v = (const char *) glGetString(s);
@@ -157,8 +156,8 @@ GLuint createProgram(const char* pVertexSource, const char* pFragmentSource) {
   }
   return program;
 }
-
 /////begin gles20_samplecode_2
+// 立方体表示の初期化
 void initCube(struct engine* engine) {
   // 頂点シェーダー、フラグメントシェーダーを設定する
   gProgram = createProgram(gVertexShader, gFragmentShader);   /////----- (1)
@@ -195,8 +194,8 @@ mat4 getPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar) {
       ymin, ymax,
       zNear ,zFar * 65536);
 }
-
 /////begin gles20_samplecode_3
+// フレーム前初期化
 void prepareFrame(struct engine* engine) {
 
   // ViewPortを指定
@@ -215,8 +214,6 @@ void prepareFrame(struct engine* engine) {
   glUniformMatrix4fv(projectionUniform, 1, 0, projectionMatrix.Pointer());                         /////----- (1) ここまで
 }
 /////end
-
-
 /////begin gles20_samplecode_4
 // レンダリングを行う
 void drawCube(struct engine* engine) {
@@ -249,4 +246,3 @@ void drawCube(struct engine* engine) {
   glDisableVertexAttribArray(ATTRIB_COLOR);
 }
 /////end
-
