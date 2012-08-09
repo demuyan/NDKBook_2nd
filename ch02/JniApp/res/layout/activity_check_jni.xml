@@ -1,0 +1,65 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+  <EditText
+        android:id="@+id/primCalcEditText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:ems="3"
+        android:inputType="number"
+        android:text="1" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/primCalcLabel1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/primCalcEditText1"
+        android:layout_toRightOf="@+id/primCalcEditText1"
+        android:text="+"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/primCalcEditText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/primCalcEditText1"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/primCalcLabel1"
+        android:ems="3"
+        android:inputType="number"
+        android:text="2" />
+
+    <TextView
+        android:id="@+id/primCalcLabel2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/primCalcEditText1"
+        android:layout_toRightOf="@+id/primCalcEditText2"
+        android:text="="
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/add_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/primCalcEditText1"
+        android:text="Add" />
+
+
+    <EditText
+        android:id="@+id/primCalcEditText3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/add_btn"
+        android:layout_toRightOf="@+id/primCalcLabel2"
+        android:ems="6"
+        android:inputType="number" />
+</RelativeLayout>

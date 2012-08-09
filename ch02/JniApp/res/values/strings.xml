@@ -1,0 +1,16 @@
+<resources>
+
+    <string name="app_name">JniApp</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="java_feature">Java Feature</string>
+    <string name="toast">Toast</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">JniApp</string>
+    <string name="title_jni_primitive1">primitive/primitive1</string>
+    <string name="title_java_nio">java/nio</string>
+    <string name="title_java_string">java/string</string>
+    <string name="title_java_feature">java/feature</string>
+    <string name="title_android_toast">android/toast</string>
+    <string name="title_android_check_jni">android/checkjni</string>
+
+</resources>
