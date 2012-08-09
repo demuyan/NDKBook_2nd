@@ -1,3 +1,4 @@
+/////begin lua_samplecode_02
 #include <jni.h>
 #include <stdio.h>
 #include <lua.h>
@@ -27,7 +28,6 @@ jint Java_com_example_nativelua_MainActivity_closeLua(JNIEnv* env, jobject thiz)
 jint Java_com_example_nativelua_MainActivity_getInteger(JNIEnv* env,
                                                         jobject thiz,
                                                         jstring valuename) {
-//  char buf[100] = { 0 };
   // Cの文字列に変換する
   const jchar* c_vname = (*env)->GetStringUTFChars(env, valuename, JNI_FALSE);
   // グローバル変数の値をスタックに積む
@@ -46,7 +46,6 @@ void Java_com_example_nativelua_MainActivity_runScript(JNIEnv* env,
                                                        jobject thiz,
                                                        jobject script) {
 
-//  char buf[100] = { 0 };
   // Cの文字列に変換する
   const char* c_script = (*env)->GetStringUTFChars(env, script, JNI_FALSE);
   // スクリプトを実行する
@@ -54,3 +53,4 @@ void Java_com_example_nativelua_MainActivity_runScript(JNIEnv* env,
   // 文字列領域を解放する
   (*env)->ReleaseStringChars(env, script, c_script);
 }
+/////end

@@ -1,10 +1,10 @@
+/////begin lua_samplecode_01
 package com.example.nativelua;
 
 import com.example.nativelua.R.id;
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -23,8 +23,9 @@ public class MainActivity extends Activity {
     setContentView(R.layout.activity_main);
     // Luaを初期化する
     initLua();
-    // 
+    // Luaスクリプトの入力項目
     scriptEditText = (EditText) findViewById(R.id.scriptEditText);
+    // 結果を出力する項目
     outputTextView = (TextView) findViewById(R.id.outputTextView);
     // サンプルコードを予め登録する
     scriptEditText.setText("value=2+3");
@@ -61,5 +62,5 @@ public class MainActivity extends Activity {
   static {
     System.loadLibrary("nativelua-jni");
   }
-
 }
+/////end

@@ -130,21 +130,22 @@ void initCube(struct engine* engine) {
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
   // テクスチャの生成
-  glGenTextures(1, &texName[0]);
+  glGenTextures(1, &texName[0]);            /////-----(1)ここから
   glBindTexture(GL_TEXTURE_2D, &texName[0]);
 
   // テクスチャ表示設定
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /////-----(1)ここまで
 
-  png_uint_32 width,height;
+  png_uint_32 width,height;  /////-----(2)ここから
   GLint type;
   GLubyte *textureImage;
-
+  // PNG画像をロードする(AssetManager経由)
   loadPngImage(engine->assetManager,  "texture.png", &width, &height, &type, &textureImage);
-  glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, textureImage);
+  // テクスチャーデータを割り当てる
+  glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, textureImage); /////-----(2)ここまで
 }
 /////end
 void prepareFrame(struct engine* engine) {
