@@ -1,3 +1,4 @@
+/////begin toast_samplecode_02
 #include <jni.h>
 #include <stdio.h>
 #include <android/log.h>
@@ -11,9 +12,10 @@ void Java_com_example_jni_JNIToastActivity_displayToast(JNIEnv* env, jobject thi
 
   // (Java)Toast toastobj = Toast.makeText(context, charseq, 0); に相当
   //Toastクラスを取得
-  jclass toast = (*env)->FindClass(env, "android/widget/Toast");
+  jclass toast = (*env)->FindClass(env, "android/widget/Toast");       /////-----(1)
+
   // ToastクラスのmakeTextスタティックメソッドのメソッドIDを取得する
-  jmethodID methodMakeText =
+  jmethodID methodMakeText =                                           /////-----(2)
       (*env)->GetStaticMethodID(
           env,
           toast,
@@ -25,11 +27,17 @@ void Java_com_example_jni_JNIToastActivity_displayToast(JNIEnv* env, jobject thi
   }
 
   // (Java)toastobj.makeText(this, charseq, 0);に相当
-  jobject toastobj = (*env)->CallStaticObjectMethod(env, toast, methodMakeText,
+  jobject toastobj = (*env)->CallStaticObjectMethod(env, toast, methodMakeText,      /////-----(3)
                                                     thiz, charseq, 0);
+
   // (Java)toastobj.show();に相当
-  jmethodID methodShow = (*env)->GetMethodID(env, toast, "show", "()V");
-  (*env)->CallVoidMethod(env, toastobj, methodShow);
+  jmethodID methodShow = (*env)->GetMethodID(env, toast, "show", "()V");       /////-----(4)
+  if (methodShow == NULL) {
+    LOGE("toast.show not Found");
+    return;
+  }
+  (*env)->CallVoidMethod(env, toastobj, methodShow); /////-----(5)
 
   return;
 }
+/////end

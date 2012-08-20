@@ -12,5 +12,7 @@
     <string name="title_java_feature">java/feature</string>
     <string name="title_android_toast">android/toast</string>
     <string name="title_android_check_jni">android/checkjni</string>
+    <string name="title_activity_add_app">android/jnihelper</string>
+    <string name="title_activity_exception">java/exception</string>
 
 </resources>

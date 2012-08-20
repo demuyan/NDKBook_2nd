@@ -17,13 +17,6 @@ public class JavaActivity extends Activity {
   private EditText mArrayEditText;
   private Button mThrowExceptionBtn;
 
-  // 例外が発生するメソッド
-  int getValues() throws IndexOutOfBoundsException {
-    int list[] = { 1, 2 };
-    // 範囲外にアクセス（ワザと例外を発生させる）
-    return list[10];
-  }
-
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -42,31 +35,12 @@ public class JavaActivity extends Activity {
       }
     });
 
-    mThrowExceptionBtn = (Button) findViewById(R.id.JvThrowException);
-    mThrowExceptionBtn.setOnClickListener(new OnClickListener() {
-
-      @Override
-      public void onClick(View v) {
-
-        try {
-          throwException();
-        } catch (Exception exp) {
-
-          AlertDialog.Builder alert = new AlertDialog.Builder(v.getContext());
-          alert.setTitle("Title");
-          alert.setMessage(exp.getMessage());
-          alert.show();
-        }
-      }
-    });
   }
 
   // 配列の値を合計する
   protected native int sumArray(int[] list);
   // 配列を取得する
   protected native int[] getArray();
-  // 例外が発生するサンプル
-  protected native void throwException() throws MyException;
 
   // あらかじめロードするモジュールを指定
   static {

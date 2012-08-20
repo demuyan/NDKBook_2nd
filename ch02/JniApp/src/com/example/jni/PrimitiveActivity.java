@@ -8,7 +8,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class PrimitiveActivity1 extends Activity {
+public class PrimitiveActivity extends Activity {
 
   protected static final String TAG = "PrimitiveActivity1";
 
@@ -61,9 +61,6 @@ public class PrimitiveActivity1 extends Activity {
         mEditText3.setText(String.valueOf(answer));
       }
     });
-
-    
-    
   }
 
   // 加算する

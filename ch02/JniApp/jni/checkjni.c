@@ -10,8 +10,9 @@
 // 引数の数値を加算して返す
 jfloat Java_com_example_jni_CheckJniActivity_addFieldValues(JNIEnv* env, jobject thiz){
 
-  // クラスを取得する
+  // インスタンスからクラスを取得する
   jclass klass = (*env)->GetObjectClass(env, thiz);
+
   // フィールド変数(mValueFoo)の値を取得する
   jfieldID jfield1 = (*env)->GetFieldID(env, klass, "mValueFoo", "F");
   if (jfield1 == NULL)
@@ -22,10 +23,14 @@ jfloat Java_com_example_jni_CheckJniActivity_addFieldValues(JNIEnv* env, jobject
   jfieldID jfield2 = (*env)->GetStaticFieldID(env, klass, "mValueBar", "F");
   if (jfield2 == NULL)
     return INFINITY;
-  jfloat val2 = (*env)->GetStaticFloatField(env, thiz, jfield2); // ここでエラーが発生する
+
+  // エラーが発生する箇所
+  // 本来はGetStaticFloatField(env, klass, jfield2);が正しい
+  jfloat val2 = (*env)->GetStaticFloatField(env, thiz, jfield2); /////-----(1)
 
   // 加算する
   float answer = val1 + val2;
+
   // フィールド変数(mValueFoo)の値を格納する
   (*env)->SetFloatField(env, thiz, jfield1,answer);
 

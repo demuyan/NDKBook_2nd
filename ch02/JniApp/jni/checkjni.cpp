@@ -11,7 +11,9 @@
 jfloat Java_com_example_jni_CheckJniActivity_addFieldValues(JNIEnv* env, jobject thiz){
 
   // クラスを取得する
+  // Cで書くと　jclass klass = (*env)->GetObjectClass(env, thiz);
   jclass klass = env->GetObjectClass(thiz);
+
   // フィールド変数(mValueFoo)の値を取得する
   jfieldID jfield1 = env->GetFieldID(klass, "mValueFoo", "F");
   if (jfield1 == NULL)
@@ -24,7 +26,10 @@ jfloat Java_com_example_jni_CheckJniActivity_addFieldValues(JNIEnv* env, jobject
     return INFINITY;
   jfloat val2 = env->GetStaticFloatField(klass, jfield2);
 
+  // 加算する
   float answer = val1 + val2;
+
+  // フィールド変数(mValueFoo)に値を格納する
   env->SetFloatField(thiz, jfield1,answer);
 
   return val1+val2;

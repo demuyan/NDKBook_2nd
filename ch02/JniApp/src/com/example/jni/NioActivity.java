@@ -31,24 +31,25 @@ public class NioActivity extends Activity {
       @Override
       public void onClick(View v) {
     /////begin nio_samplecode_01
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(10);
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(10);   /////-----(1)
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);               /////-----(2)
 
         int a = 30;
         short b = 20;
         byte c = 10;
-
-        byteBuffer.putInt(0, a);
+        
+         // byteBufferに書き込む
+        byteBuffer.putInt(0, a);     /////-----(3)ここから
         byteBuffer.putShort(4, b);
-        byteBuffer.put(6, c);
-        // JNIの関数を呼び出す
-        calcBuffer(byteBuffer);
+        byteBuffer.put(6, c);    /////-----(3)ここまで
 
-        StringBuffer strBuf = new StringBuffer();
+        // JNIの関数を呼び出す
+        calcBuffer(byteBuffer);  /////-----(4)
+
+        StringBuffer strBuf = new StringBuffer();         /////-----(5)ここから
         strBuf.append("a=" + byteBuffer.getInt(0) + "\n");
         strBuf.append("b=" + byteBuffer.getShort(4) + "\n");
-        strBuf.append("c=" + byteBuffer.get(6) + "\n");
-
+        strBuf.append("c=" + byteBuffer.get(6) + "\n");   /////-----(5)ここまで
         mTextView.setText(strBuf.toString());
         /////end
       }

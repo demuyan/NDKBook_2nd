@@ -40,13 +40,67 @@
         android:layout_below="@+id/scriptEditText"
         android:text="Output" />
 
-    <TextView
-        android:id="@+id/outputTextView"
-        android:layout_width="match_parent"
+    <TableLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/textView2"
-        />
+         >
 
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
 
+            <EditText
+                android:id="@+id/valueEditText1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" 
+                android:text="value1"/>
+
+            <TextView
+                android:id="@+id/valueTextView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <EditText
+                android:id="@+id/valueEditText2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" 
+                android:text="value2"/>
+
+            <TextView
+                android:id="@+id/valueTextView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                 />
+            
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <EditText
+                android:id="@+id/valueEditText3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" 
+                android:text="value3"/>
+
+            <TextView
+                android:id="@+id/valueTextView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+        </TableRow>
+    </TableLayout>
 </RelativeLayout>

@@ -1,5 +1,5 @@
 
-#include <jnihelper.h>
+#include <jnihelp.h>
 
 int jniRegisterNativeMethods(JNIEnv* env, const char* className,
     const JNINativeMethod* gMethods, int numMethods)

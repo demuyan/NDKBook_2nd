@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PrimitiveActivity1"
+            android:name=".PrimitiveActivity"
             android:label="@string/title_jni_primitive1" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -70,6 +70,25 @@
             android:label="@string/title_android_check_jni" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AddAppActivity"
+            android:label="@string/title_activity_add_app" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ExceptionActivity"
+            android:label="@string/title_activity_exception" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.SAMPLE_CODE" />
             </intent-filter>
         </activity>

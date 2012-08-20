@@ -24,7 +24,7 @@ public class CheckJniActivity extends Activity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_check_jni);
+    setContentView(R.layout.check_jni);
 
     mEditText1 = (EditText) findViewById(R.id.primCalcEditText1);
     mEditText2 = (EditText) findViewById(R.id.primCalcEditText2);
