@@ -9,7 +9,7 @@
     <string name="source_prompt">Media source</string>
 
     <string-array name="source_array">
-        <item>/sdcard/NativeMedia.ts</item>
+        <item>/sdcard/rabbit.ts</item>
     </string-array>
 
 </resources>
