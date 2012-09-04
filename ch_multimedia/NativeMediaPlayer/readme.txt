@@ -1,4 +1,4 @@
-NativeMedia.tsをいったん端末のSDカードにコピーしてから、このサンプルコードを実行してください。
-コピーは、adbコマンドを利用して行います。
+rabbit.tsを端末のSDカード領域にコピーした後、サンプルコードを実行してください。
+端末へのコピーは、adbコマンドを利用します。
 
-% adb push NativeMedia.ts /sdcard/
+% adb push rabbit.ts /sdcard/
