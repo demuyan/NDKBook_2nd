@@ -1,4 +1,5 @@
-	.arch armv7-a
+@/////begin neon_samplecode_02
+        .arch armv7-a
 	.eabi_attribute 27, 3
 	.fpu neon
 	.eabi_attribute 20, 1
@@ -209,3 +210,4 @@ Java_com_example_neon_MainActivity_multineon:
 	.size	Java_com_example_neon_MainActivity_multineon, .-Java_com_example_neon_MainActivity_multineon
 	.ident	"GCC: (GNU) 4.6.x-google 20120106 (prerelease)"
 	.section	.note.GNU-stack,"",%progbits
+@/////end

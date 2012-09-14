@@ -129,23 +129,23 @@ void initCube(struct engine* engine) {
   // 利用するテクスチャは非圧縮とする
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  // テクスチャの生成
-  glGenTextures(1, &texName[0]);            /////-----(1)ここから
+  // テクスチャ割当を生成
+  glGenTextures(1, &texName[0]);  
   glBindTexture(GL_TEXTURE_2D, &texName[0]);
 
   // テクスチャ表示設定
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /////-----(1)ここまで
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 
-  png_uint_32 width,height;  /////-----(2)ここから
+  png_uint_32 width,height;  
   GLint type;
   GLubyte *textureImage;
-  // PNG画像をロードする(AssetManager経由)
+  // PNG画像をOpenGL|ESのテクスチャとしてロードする(AssetManager経由)
   loadPngImage(engine->assetManager,  "texture.png", &width, &height, &type, &textureImage);
   // テクスチャーデータを割り当てる
-  glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, textureImage); /////-----(2)ここまで
+  glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, textureImage);
 }
 /////end
 void prepareFrame(struct engine* engine) {
@@ -182,9 +182,9 @@ void drawCube(struct engine* engine) {
   glEnableClientState(GL_VERTEX_ARRAY);
   
   // テクスチャの指定
-  glEnable(GL_TEXTURE_2D);                                /////-----(1) ここから
+  glEnable(GL_TEXTURE_2D);                              
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);           
-  glTexCoordPointer(2, GL_FLOAT, 0, cubeTexCoords);       /////-----(1)　ここまで
+  glTexCoordPointer(2, GL_FLOAT, 0, cubeTexCoords);     
 
   // 立方体を描画
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, cubeIndices);
