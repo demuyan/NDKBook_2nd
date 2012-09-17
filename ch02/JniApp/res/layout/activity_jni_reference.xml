@@ -1,0 +1,37 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+        <Button
+        android:id="@+id/JvRefBtn1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:text="LocalRef-NG" />
+
+        <Button
+            android:id="@+id/JvRefBtn2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/JvRefBtn1"
+            android:text="LocalRef-OK" />
+
+        <Button
+            android:id="@+id/JvRefBtn3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/JvRefBtn2"
+            android:text="LocalFrame NG" />
+        
+        <Button
+            android:id="@+id/JvRefBtn4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/JvRefBtn3"
+            android:text="LocalFrame OK" />
+        
+</RelativeLayout>

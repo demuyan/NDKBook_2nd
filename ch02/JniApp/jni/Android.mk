@@ -47,3 +47,9 @@ LOCAL_MODULE    := exception-jni
 LOCAL_SRC_FILES := exception.c
 LOCAL_LDLIBS    := -llog
 include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE    := jnireference-jni
+LOCAL_SRC_FILES := jnireference.c
+LOCAL_LDLIBS    := -llog
+include $(BUILD_SHARED_LIBRARY)

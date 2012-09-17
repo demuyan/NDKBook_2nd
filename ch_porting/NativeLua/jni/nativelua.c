@@ -6,6 +6,7 @@
 
 static lua_State *L = NULL;
 
+// Luaの初期化
 jint Java_com_example_nativelua_MainActivity_initLua(JNIEnv* env, jobject thiz) {
   if (L == NULL) {
     // Luaの初期化
@@ -16,6 +17,7 @@ jint Java_com_example_nativelua_MainActivity_initLua(JNIEnv* env, jobject thiz) 
   return 0;
 }
 
+// Luaの終了
 jint Java_com_example_nativelua_MainActivity_closeLua(JNIEnv* env, jobject thiz) {
   if (L != NULL) {
     // Lua終了
@@ -25,6 +27,7 @@ jint Java_com_example_nativelua_MainActivity_closeLua(JNIEnv* env, jobject thiz)
   return 0;
 }
 
+// 整数値(Integer)を取得する
 jint Java_com_example_nativelua_MainActivity_getInteger(JNIEnv* env,
                                                         jobject thiz,
                                                         jstring valuename) {
@@ -42,6 +45,7 @@ jint Java_com_example_nativelua_MainActivity_getInteger(JNIEnv* env,
   return value;
 }
 
+// スクリプトを実行する
 void Java_com_example_nativelua_MainActivity_runScript(JNIEnv* env,
                                                        jobject thiz,
                                                        jobject script) {
