@@ -13,7 +13,7 @@ import android.widget.TextView;
 public class JniReferenceActivity extends Activity {
 
   protected static final String TAG = "JniReferneceActivity";
-  private Button mRefBtn1,mRefBtn2,mRefBtn3, mRefBtn4;
+  private Button mRefBtn1,mRefBtn2,mRefBtn3, mRefBtn4, mRefBtn5;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -66,6 +66,18 @@ public class JniReferenceActivity extends Activity {
       }
     });
 
+    mRefBtn5 = (Button) findViewById(R.id.JvRefBtn5);
+    mRefBtn5.setOnClickListener(new OnClickListener() {
+
+      @Override
+      public void onClick(View v) {        
+       
+        String str = getFrameStringOK();
+        Log.d(TAG, str);
+      }
+    });
+    
+    
   }
 
   protected native void setStringNG(String str);
@@ -73,6 +85,8 @@ public class JniReferenceActivity extends Activity {
   protected native void getString();
   protected native String getFrameStringNG();
   protected native String getFrameStringOK();
+
+  protected native void weakGlobalRef();
 
   // あらかじめロードするモジュールを指定
   static {

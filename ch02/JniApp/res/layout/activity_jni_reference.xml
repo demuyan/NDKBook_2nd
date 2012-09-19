@@ -33,5 +33,13 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/JvRefBtn3"
             android:text="LocalFrame OK" />
+
+                <Button
+            android:id="@+id/JvRefBtn5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/JvRefBtn4"
+            android:text="WeakGlobalRef" />
         
 </RelativeLayout>
