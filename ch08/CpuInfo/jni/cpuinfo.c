@@ -30,15 +30,15 @@ void getArmInfo(char* cpuinfo){
 
   uint64_t features = android_getCpuFeatures();
 
-  // ARMv7命令をサポート?
+  // ARMv7をサポート?
   if (features & ANDROID_CPU_ARM_FEATURE_ARMv7)
     strcat(cpuinfo, "ARMv7 ");
 
-  // VFPv3命令をサポート?
+  // VFPv3をサポート?
   if (features & ANDROID_CPU_ARM_FEATURE_VFPv3)
     strcat(cpuinfo, "VFPv3 ");
 
-  // NEON命令をサポート?
+  // NEONをサポート?
   if (features & ANDROID_CPU_ARM_FEATURE_NEON)
     strcat(cpuinfo, "NEON ");
 
@@ -53,7 +53,7 @@ void getX86Info(char* cpuinfo){
 
   uint64_t features = android_getCpuFeatures();
 
-  // SSE3命令をサポート?
+  // SSE3をサポート?
   if (features & ANDROID_CPU_X86_FEATURE_SSSE3)
     strcat(cpuinfo, "SSSE3 ");
 
