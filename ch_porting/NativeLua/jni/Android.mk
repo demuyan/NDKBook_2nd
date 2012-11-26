@@ -1,7 +1,7 @@
 #/////begin lua_samplecode_03
 LOCAL_PATH := $(call my-dir)
 
-# libpngをAndroidで利用できるように
+# libluaをAndroidで利用できるように
 # prebuiltしたライブラリは直接リンクできない
 include $(CLEAR_VARS)
 LOCAL_MODULE := liblua-prebuilt
