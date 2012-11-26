@@ -1,4 +1,4 @@
-#/////begin gl11tex_samplecode_1
+
 LOCAL_PATH := $(call my-dir)
 
 # prebuildされたモジュールをリンクできるようにする
@@ -18,4 +18,3 @@ LOCAL_STATIC_LIBRARIES := android_native_app_glue libpng15-prebuilt   #/////----
 include $(BUILD_SHARED_LIBRARY)
 
 $(call import-module,android/native_app_glue)
-#/////end

@@ -302,6 +302,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
   }
 }
 
+
 // Main関数
 void android_main(struct android_app* state) {
   struct engine engine;
@@ -311,27 +312,28 @@ void android_main(struct android_app* state) {
 
   memset(&engine, 0, sizeof(engine));
   // ユーザーデータの配置
-  state->userData = &engine;
+  state->userData = &engine;       /////-----(1)
   // アプリケーションコマンド処理関数の設定
-  state->onAppCmd = engine_handle_cmd;
+  state->onAppCmd = engine_handle_cmd; /////----- (2)
   // 入力イベント処理関数の設定
-  state->onInputEvent = engine_handle_input;
+  state->onInputEvent = engine_handle_input; /////----- (3)
   engine.app = state;
 
   // センサーマネージャの取得
-  engine.sensorManager = ASensorManager_getInstance();
+  engine.sensorManager = ASensorManager_getInstance();  /////----- (4)ここから
   // 加速度センサーのデータ取得準備
   engine.accelerometerSensor = ASensorManager_getDefaultSensor(
     engine.sensorManager, ASENSOR_TYPE_ACCELEROMETER);
   // センサー情報取得キューの新規作成
   engine.sensorEventQueue = ASensorManager_createEventQueue(
     engine.sensorManager, state->looper, LOOPER_ID_USER, NULL,
-    NULL);
+    NULL);                                              /////----- (4)ここまで
 
-  if (state->savedState != NULL) {
+  if (state->savedState != NULL) {                      /////----- (5)ここから
     // 以前の状態に戻す
     engine.state = *(struct saved_state*) state->savedState;
-  }
+  }                                                     /////----- (5)ここまで
+
 
   while (1) {
     int ident;
@@ -340,7 +342,7 @@ void android_main(struct android_app* state) {
 
     // アプリケーションの状態にあわせてセンサー情報の処理を行う
     while ((ident = ALooper_pollAll(engine.animating ? 0 : -1, NULL,
-                                    &events, (void**) &source)) >= 0) {
+                                    &events, (void**) &source)) >= 0) { /////-----(1)
 
       // 内部イベントを処理する
       if (source != NULL) {
@@ -348,7 +350,7 @@ void android_main(struct android_app* state) {
       }
 
       // センサー情報取得キューのデータを処理する
-      if (ident == LOOPER_ID_USER) {
+      if (ident == LOOPER_ID_USER) { /////-----(2)ここから
         if (engine.accelerometerSensor != NULL) {
           ASensorEvent event;
           while (ASensorEventQueue_getEvents(
@@ -358,10 +360,10 @@ void android_main(struct android_app* state) {
                  event.acceleration.z);
           }
         }
-      }
+      }/////-----(2)ここまで
 
       // EGL情報を破棄する
-      if (state->destroyRequested != 0) {
+      if (state->destroyRequested != 0) { /////-----(3)
         engine_term_display(&engine);
         return;
       }
@@ -369,13 +371,14 @@ void android_main(struct android_app* state) {
 
     if (engine.animating) {
       // アニメーション（四角形の回転演算）処理
-      engine.state.angle += .01f;
+      engine.state.angle += .01f;  /////-----(4)ここから
       if (engine.state.angle > 1) {
         engine.state.angle = 0;
       }
 
       // 画面の描画
-      engine_draw_frame(&engine);
+      engine_draw_frame(&engine); /////-----(4)ここまで
     }
   }
+
 }

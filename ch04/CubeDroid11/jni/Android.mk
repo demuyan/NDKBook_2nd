@@ -1,4 +1,4 @@
-#/////begin p98_middle_samplecode
+
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -20,4 +20,3 @@ include $(BUILD_SHARED_LIBRARY)
 
 # native_app_glue の呼び出し指定
 $(call import-module,android/native_app_glue)
-#/////end

@@ -6,7 +6,7 @@
 #define TAG "exception"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 
-/////begin exception_samplecode_02
+
 // インデックスの値を取得(例外チェック＆例外発生)
 jint Java_com_example_jni_ExceptionActivity_getValueOfData(JNIEnv* env,
                                                            jobject thiz,
@@ -46,4 +46,4 @@ jint Java_com_example_jni_ExceptionActivity_getValueOfData(JNIEnv* env,
   }
   return value;
 }
-/////end
+

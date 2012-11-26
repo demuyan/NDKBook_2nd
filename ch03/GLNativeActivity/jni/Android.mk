@@ -1,4 +1,4 @@
-#/////begin android_mk_samplecode
+
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -16,4 +16,3 @@ LOCAL_STATIC_LIBRARIES := android_native_app_glue #=====(2)
 include $(BUILD_SHARED_LIBRARY)
 #外部モジュールのパス指定
 $(call import-module,android/native_app_glue) #=====(3)
-#/////end

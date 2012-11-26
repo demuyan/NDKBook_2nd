@@ -14,7 +14,7 @@
 
 #include "libpng_android.h"
 
-/////begin gl11tex_samplecode_2
+
 int offset = 0;
 void callback_read(png_structp pPng, png_bytep buf, png_size_t size) {
   // ポインタを取得する
@@ -144,4 +144,4 @@ int loadPngImage(AAssetManager* mgr, char *filename, png_uint_32* outWidth,
 
   return TRUE;
 }
-/////end
+

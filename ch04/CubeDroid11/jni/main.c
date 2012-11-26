@@ -89,7 +89,7 @@ static const GLubyte cubeColors[] = {
   255,   0, 255, 255
 };
 
-/////begin p93_down_samplecode
+
 // 表示の初期化
 void initCube(struct engine* engine) {
 
@@ -104,7 +104,7 @@ void initCube(struct engine* engine) {
   // 陰影モード設定
   glShadeModel(GL_SMOOTH);
 }
-/////end
+
 // 描画前処理
 void prepareFrame(struct engine* engine) {
 
@@ -126,7 +126,7 @@ void prepareFrame(struct engine* engine) {
   glLoadIdentity();
 }
 
-/////begin p96_samplecode
+
 // 立方体の描画
 void drawCube(struct engine* engine) {
   // カメラの位置、向きを指定
@@ -157,9 +157,9 @@ static void engine_draw_frame(struct engine* engine) {
   // ダブルバッファ入替
   eglSwapBuffers(engine->display, engine->surface); /////-----(3)
 }
-/////end
 
-/////begin p91_down_samplecode
+
+
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
 
@@ -229,9 +229,9 @@ static int engine_init_display(struct engine* engine) {
 
   return 0;
 }
-/////end
 
-/////begin p97_samplecode
+
+
 // EGL情報を破棄する
 static void engine_term_display(struct engine* engine) {
   if (engine->display != EGL_NO_DISPLAY) {
@@ -254,7 +254,7 @@ static void engine_term_display(struct engine* engine) {
   engine->context = EGL_NO_CONTEXT;
   engine->surface = EGL_NO_SURFACE;
 }
-/////end
+
 
 // 入力イベントを処理する
 static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) {
@@ -267,7 +267,7 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
   }
   return 0;
 }
-/////begin p91_up_samplecode
+
 // メインコマンドの処理
 static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
   struct engine* engine = (struct engine*) app->userData;
@@ -293,7 +293,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     // EGL情報を破棄する
     engine_term_display(engine); /////-----(2)
     break;
-/////end
+
   case APP_CMD_GAINED_FOCUS: // アプリがフォーカスを取得したとき
     if (engine->accelerometerSensor != NULL) {
       // 加速度センサーを有効化する
@@ -332,7 +332,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     break;
   }
 }
-/////begin p90_samplecode
+
 // Main関数
 void android_main(struct android_app* state) {
   struct engine engine;
@@ -348,7 +348,7 @@ void android_main(struct android_app* state) {
   // 入力イベント処理関数の設定
   state->onInputEvent = engine_handle_input;
   engine.app = state;
-/////end
+
 
   // センサーからのデータ取得に必要な初期化
   engine.sensorManager = ASensorManager_getInstance();

@@ -156,7 +156,7 @@ GLuint createProgram(const char* pVertexSource, const char* pFragmentSource) {
   }
   return program;
 }
-/////begin gles20_samplecode_2
+
 // 立方体表示の初期化
 void initCube(struct engine* engine) {
   // 頂点シェーダー、フラグメントシェーダーを設定する
@@ -178,7 +178,7 @@ void initCube(struct engine* engine) {
   // デプステストを有効化する
   glEnable(GL_DEPTH_TEST);
 }
-/////end
+
 #undef PI
 #define PI 3.1415926535897932f
 
@@ -194,7 +194,7 @@ mat4 getPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar) {
       ymin, ymax,
       zNear ,zFar * 65536);
 }
-/////begin gles20_samplecode_3
+
 // フレーム前初期化
 void prepareFrame(struct engine* engine) {
 
@@ -213,8 +213,8 @@ void prepareFrame(struct engine* engine) {
   mat4 projectionMatrix = getPerspective(45, (float) engine->width / engine->height, 0.5f, 500);
   glUniformMatrix4fv(projectionUniform, 1, 0, projectionMatrix.Pointer());                         /////----- (1) ここまで
 }
-/////end
-/////begin gles20_samplecode_4
+
+
 // レンダリングを行う
 void drawCube(struct engine* engine) {
 
@@ -245,4 +245,4 @@ void drawCube(struct engine* engine) {
   glDisableVertexAttribArray(ATTRIB_VERTEX);
   glDisableVertexAttribArray(ATTRIB_COLOR);
 }
-/////end
+

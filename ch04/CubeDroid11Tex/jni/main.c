@@ -111,7 +111,7 @@ const GLfloat cubeTexCoords[] = {
   0,0,1,0,1,1,0,1,
   0,0,1,0,1,1,0,1
 };
-/////begin gl11tex_samplecode_3
+
 // 表示の初期化
 void initCube(struct engine* engine) {
 
@@ -145,7 +145,7 @@ void initCube(struct engine* engine) {
   loadPngImage(engine->assetManager,  "texture.png", &width, &height, &type, &textureImage);
   glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, textureImage);
 }
-/////end
+
 void prepareFrame(struct engine* engine) {
 
   // ViewPortを指定
@@ -166,7 +166,7 @@ void prepareFrame(struct engine* engine) {
   glLoadIdentity();
 }
 
-/////begin gl11tex_samplecode_4
+
 // 立方体の描画
 void drawCube(struct engine* engine) {
 
@@ -187,7 +187,7 @@ void drawCube(struct engine* engine) {
   // 立方体を描画
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, cubeIndices);
 }
-/////end
+
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
 

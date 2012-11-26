@@ -1,4 +1,4 @@
-/////begin toast_samplecode_02
+
 #include <jni.h>
 #include <stdio.h>
 #include <android/log.h>
@@ -40,4 +40,4 @@ void Java_com_example_jni_JNIToastActivity_displayToast(JNIEnv* env, jobject thi
 
   return;
 }
-/////end
+

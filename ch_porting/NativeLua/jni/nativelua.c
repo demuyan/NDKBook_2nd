@@ -1,4 +1,4 @@
-/////begin lua_samplecode_02
+
 #include <jni.h>
 #include <stdio.h>
 #include <lua.h>
@@ -57,4 +57,4 @@ void Java_com_example_nativelua_MainActivity_runScript(JNIEnv* env,
   // 文字列領域を解放する
   (*env)->ReleaseStringChars(env, script, c_script);
 }
-/////end
+

@@ -1,4 +1,4 @@
-#//////begin ch_multi_samplecode_1
+
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -10,4 +10,4 @@ LOCAL_LDLIBS    += -lOpenMAXAL  #/////=====(1)
 LOCAL_LDLIBS    += -landroid    #/////======(2)
 
 include $(BUILD_SHARED_LIBRARY)
-#//////end
+

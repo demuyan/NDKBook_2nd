@@ -5,7 +5,7 @@
 #define TAG "javaactivity"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 
-/////begin jniarray_samplecode_01
+
 // 配列の数値を合計する
 jint Java_com_example_jni_JavaActivity_sumArray(JNIEnv* env, jobject thiz,
                                                 jintArray arr) {
@@ -27,8 +27,8 @@ jint Java_com_example_jni_JavaActivity_sumArray(JNIEnv* env, jobject thiz,
 
   return sum;
 }
-/////end
-/////begin jniarray_samplecode_02
+
+
 // 配列を生成する
 jintArray Java_com_example_jni_JavaActivity_getArray(JNIEnv* env, jobject thiz,
                                                      jint size) {
@@ -52,4 +52,4 @@ jintArray Java_com_example_jni_JavaActivity_getArray(JNIEnv* env, jobject thiz,
 
   return ary;
 }
-/////end
+

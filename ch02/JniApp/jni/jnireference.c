@@ -5,28 +5,28 @@
 #define TAG "JniReference"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 
-/////begin jni_locref_01
+
 static jobject localString,localFrameString;
 
 void Java_com_example_jni_JniReferenceActivity_setStringNG(JNIEnv* env, jobject thiz, jobject obj){
 
   localString = obj; // ローカル参照扱い
 }
-/////end
-/////begin jni_locref_02
+
+
 void Java_com_example_jni_JniReferenceActivity_setStringOK(JNIEnv* env, jobject thiz, jobject obj){
   // グローバル参照にする
   localString = (*env)->NewGlobalRef(env,obj);
 }
-/////end
-/////begin jni_locref_03
+
+
 void Java_com_example_jni_JniReferenceActivity_getString(JNIEnv* env, jobject thiz){
 
   const char* str = (*env)->GetStringUTFChars(env, localString,JNI_FALSE);
   LOGD("%s\n",str);
 }
-/////end
-/////begin jni_locref_04
+
+
 jobject Java_com_example_jni_JniReferenceActivity_getFrameStringNG(JNIEnv* env, jobject thiz){
 
   // ローカルフレームを確保する
@@ -42,8 +42,8 @@ jobject Java_com_example_jni_JniReferenceActivity_getFrameStringNG(JNIEnv* env, 
 
   return localFrameString;
 }
-/////end
-/////begin jni_locref_05
+
+
 jobject Java_com_example_jni_JniReferenceActivity_getFrameStringOK(JNIEnv* env, jobject thiz){
 
   // ローカルフレームを確保する
@@ -61,4 +61,4 @@ jobject Java_com_example_jni_JniReferenceActivity_getFrameStringOK(JNIEnv* env, 
 
   return localFrameString;
 }
-/////end
+

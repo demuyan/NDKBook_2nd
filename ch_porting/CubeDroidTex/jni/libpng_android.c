@@ -1,4 +1,4 @@
-/////begin libpng_samplecode_01
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -127,4 +127,4 @@ int loadPngImage(AAssetManager* mgr, char *filename, png_uint_32* outWidth, png_
 
   return TRUE;
 }
-/////end
+

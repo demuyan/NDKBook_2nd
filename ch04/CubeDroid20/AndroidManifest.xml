@@ -1,4 +1,4 @@
-<!-- /////begin gles20_samplecode_5 -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.cubedroid20"
     android:versionCode="1"
@@ -26,4 +26,4 @@
     </application>
 
 </manifest>
-<!-- /////end -->
+

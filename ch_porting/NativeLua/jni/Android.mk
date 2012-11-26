@@ -1,4 +1,4 @@
-#/////begin lua_samplecode_03
+
 LOCAL_PATH := $(call my-dir)
 
 # libluaをAndroidで利用できるように
@@ -15,4 +15,3 @@ LOCAL_MODULE    := nativelua-jni
 LOCAL_SRC_FILES := nativelua.c
 LOCAL_STATIC_LIBRARIES := liblua-prebuilt
 include $(BUILD_SHARED_LIBRARY)
-#/////end

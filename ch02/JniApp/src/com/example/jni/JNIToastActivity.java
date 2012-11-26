@@ -1,4 +1,4 @@
-/////begin toast_samplecode_01
+
 package com.example.jni;
 
 import android.app.Activity;
@@ -38,4 +38,3 @@ public class JNIToastActivity extends Activity {
     System.loadLibrary("jnitoast-jni");
   }
 }
-/////end

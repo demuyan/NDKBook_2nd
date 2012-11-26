@@ -6,7 +6,7 @@
 #define TAG "CheckJni"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 
-/////begin jnicheck_samplecode_01
+
 // 引数の数値を加算して返す
 jfloat Java_com_example_jni_CheckJniActivity_addFieldValues(JNIEnv* env, jobject thiz){
 
@@ -36,4 +36,4 @@ jfloat Java_com_example_jni_CheckJniActivity_addFieldValues(JNIEnv* env, jobject
 
   return val1+val2;
 }
-/////end
+

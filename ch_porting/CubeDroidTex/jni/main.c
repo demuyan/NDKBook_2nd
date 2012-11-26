@@ -73,7 +73,7 @@ struct engine
 
 GLuint texName[1];
 
-/////begin libpng_samplecode_05
+
 // 頂点リスト
 static const GLfloat cubeVertices[] = {
  /*  X     Y     Z */
@@ -111,8 +111,8 @@ const GLfloat cubeTexCoords[] = {
   0,0,1,0,1,1,0,1,
   0,0,1,0,1,1,0,1
 };
-/////end
-/////begin libpng_samplecode_03
+
+
 // 表示の初期化
 void initCube(struct engine* engine) {
 
@@ -147,7 +147,7 @@ void initCube(struct engine* engine) {
   // テクスチャーデータを割り当てる
   glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, textureImage);
 }
-/////end
+
 void prepareFrame(struct engine* engine) {
 
   // ViewPortを指定
@@ -168,7 +168,7 @@ void prepareFrame(struct engine* engine) {
   glLoadIdentity();
 }
 
-/////begin libpng_samplecode_04
+
 // 立方体の描画
 void drawCube(struct engine* engine) {
 
@@ -189,7 +189,7 @@ void drawCube(struct engine* engine) {
   // 立方体を描画
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, cubeIndices);
 }
-/////end
+
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
 

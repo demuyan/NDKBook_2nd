@@ -63,7 +63,7 @@ static jboolean enqueueInitialBuffers(jboolean discontinuity);
 
 
 
-/////begin ch_multi_samplecode_6
+
 //　MEPG-2 TSパケットからメディアプレイヤーにデータを供給するためのコールバック
 static XAresult AndroidBufferQueueCallback(XAAndroidBufferQueueItf caller,
                                            void *pCallbackContext,
@@ -144,7 +144,7 @@ static XAresult AndroidBufferQueueCallback(XAAndroidBufferQueueItf caller,
   exit: pthread_mutex_unlock(&mutex);
   return XA_RESULT_SUCCESS;
 }
-/////end
+
 
 // ストリーミング情報が新しくなる、もしくは変化した場合は、このコールバックが呼び出される
 static void StreamChangeCallback(XAStreamInformationItf caller,
@@ -178,7 +178,7 @@ static void StreamChangeCallback(XAStreamInformationItf caller,
 }
 
 
-/////begin ch_multi_samplecode_7
+
 // 初期バッファをキューに貯めこむ
 static jboolean enqueueInitialBuffers(jboolean discontinuity) {
 
@@ -234,7 +234,7 @@ static jboolean enqueueInitialBuffers(jboolean discontinuity) {
 
   return JNI_TRUE;
 }
-/////end
+
 
 //  ストリーミングメディアプレイヤーを巻き戻す
 void rewindStreamingMediaPlayer(JNIEnv *env, jclass clazz) {
@@ -254,7 +254,7 @@ void rewindStreamingMediaPlayer(JNIEnv *env, jclass clazz) {
   }
 }
 
-/////begin ch_multi_samplecode_5
+
 // ストリーミングメディアプレイヤーを生成する
 jboolean createStreamingMediaPlayer(JNIEnv* env, jclass clazz, jstring filename) {
   XAresult res;
@@ -353,7 +353,7 @@ jboolean createStreamingMediaPlayer(JNIEnv* env, jclass clazz, jstring filename)
 
   return JNI_TRUE;
 }
-/////end
+
 
 // ストリーミングメディアプレイヤーのプレイ状態をセットする
 void setPlayingStreamingMediaPlayer(JNIEnv* env, jclass clazz,
@@ -406,15 +406,15 @@ void shutdown(JNIEnv* env, jclass clazz) {
   }
 }
 
-/////begin ch_multi_samplecode_4
+
 // サーフェイスをセットする
 void setSurface(JNIEnv *env, jclass clazz, jobject surface) {
   // JavaのサーフェイスからNativeWindowを取得する
   theNativeWindow = ANativeWindow_fromSurface(env, surface); 
 }
-/////end
 
-/////begin ch_multi_samplecode_3
+
+
 // engineとoutput mixを生成する /////-----(1)ここから
 void createEngine(JNIEnv* env, jclass clazz) {
   // engineを生成する
@@ -431,7 +431,7 @@ void createEngine(JNIEnv* env, jclass clazz) {
   // output mixを実体化する
   (*outputMixObject)->Realize(outputMixObject, XA_BOOLEAN_FALSE);
 } /////-----(1)ここまで
-/////end
+
 
 static JNINativeMethod sMethods[] = {
 { "createEngine", "()V",                       
@@ -459,4 +459,4 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
                            sMethods, NELEM(sMethods));
   return JNI_VERSION_1_6;
 }
-/////end
+

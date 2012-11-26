@@ -1,7 +1,7 @@
 #include <jni.h>
 #include <cpu-features.h>
 
-/////begin ch08_samplecode_1
+
 // 利用しているCPUアーキテクチャを判別する
 AndroidCpuFamily getCpuArch(char* cpuinfo){
 
@@ -23,8 +23,8 @@ AndroidCpuFamily getCpuArch(char* cpuinfo){
   }
   return cpuFamily;
 }
-/////end
-/////begin ch08_samplecode_2
+
+
 // 利用しているARMアーキテクチャの機能詳細を取得
 void getArmInfo(char* cpuinfo){
 
@@ -46,8 +46,8 @@ void getArmInfo(char* cpuinfo){
   if (features & ANDROID_CPU_ARM_FEATURE_LDREX_STREX)
     strcat(cpuinfo, "LDREX_STREX ");
 }
-/////end
-/////begin ch08_samplecode_3
+
+
 // 利用しているx86アーキテクチャの機能詳細を取得
 void getX86Info(char* cpuinfo){
 
@@ -65,7 +65,7 @@ void getX86Info(char* cpuinfo){
   if (features & ANDROID_CPU_X86_FEATURE_MOVBE)
     strcat(cpuinfo, "MOVBE ");
 }
-/////end
+
 // CPU情報を取得する
 jobject Java_com_example_cpuinfo_MainActivity_getCpuInfo(JNIEnv* env, jobject thiz) {
 

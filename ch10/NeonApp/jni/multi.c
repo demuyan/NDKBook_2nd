@@ -1,4 +1,4 @@
-/////begin neon_samplecode_01
+
 #include <jni.h>
 
 #define SIZE 30000
@@ -24,4 +24,4 @@ void Java_com_example_neon_MainActivity_multi(JNIEnv* env, jobject thiz){
 
   multi(lst1, lst2, lst3, SIZE);
 }
-/////end
+

@@ -7,7 +7,7 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
-/////begin ch06_samplecode_9
+
 // 指定したディレクトリ内のファイル一覧を取得する
 jobject getAssetsFilelistInDir(JNIEnv* env, jclass thiz, jobject assetManager,
                                jstring dirName) {
@@ -47,8 +47,8 @@ jobject getAssetsFilelistInDir(JNIEnv* env, jclass thiz, jobject assetManager,
 
   return objary;
 }
-/////end
-/////begin ch06_samplecode_10
+
+
 // 指定したファイルを読み込んで返す
 jobject getAssetsReadTextfile(JNIEnv* env, jclass thiz, jobject assetManager,
                           jstring filename) {
@@ -82,7 +82,7 @@ jobject getAssetsReadTextfile(JNIEnv* env, jclass thiz, jobject assetManager,
 
   return jstr;
 }
-/////end
+
 static JNINativeMethod sMethods[] = {
 /* name, signature, funcPtr */
 { "getAssetsFilelistInDir",

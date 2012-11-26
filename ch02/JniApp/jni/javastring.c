@@ -4,7 +4,7 @@
 
 #define TAG "Primitive"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
-/////begin jnistring_samplecode_01
+
 // 文字列を結合して返す
 jobject Java_com_example_jni_JavaStringActivity_concatStrings(JNIEnv* env, jobject thiz, jstring str1, jstring str2){ /////-----(1)
 
@@ -33,8 +33,8 @@ jobject Java_com_example_jni_JavaStringActivity_concatStrings(JNIEnv* env, jobje
 
   return jstr;
 }
-/////end
-/////begin jnistring_samplecode_02
+
+
 // フィールドの文字列を結合して返す
 jobject Java_com_example_jni_JavaStringActivity_concatFieldStrings(JNIEnv* env, jobject thiz){
 
@@ -74,5 +74,5 @@ jobject Java_com_example_jni_JavaStringActivity_concatFieldStrings(JNIEnv* env, 
 
   return jstr;
 }
-/////end
+
 

@@ -1,4 +1,4 @@
-/////begin lua_samplecode_01
+
 package com.example.nativelua;
 
 import com.example.nativelua.R.id;
@@ -76,4 +76,3 @@ public class MainActivity extends Activity {
     System.loadLibrary("nativelua-jni");
   }
 }
-/////end

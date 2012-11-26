@@ -17,13 +17,13 @@ LOCAL_MODULE    := java-jni
 LOCAL_SRC_FILES := java-jni.c
 LOCAL_LDLIBS    += -llog  
 include $(BUILD_SHARED_LIBRARY)
-#/////begin toast_samplecode_03
+
 include $(CLEAR_VARS)
 LOCAL_MODULE    := jnitoast-jni
 LOCAL_SRC_FILES := jnitoast.c
 LOCAL_LDLIBS    += -llog
 include $(BUILD_SHARED_LIBRARY)
-#/////end
+
 include $(CLEAR_VARS)
 LOCAL_MODULE    := nio-jni
 LOCAL_SRC_FILES := nio.c

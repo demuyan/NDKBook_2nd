@@ -7,7 +7,7 @@
 #define LOGD(... ) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
 #define LOGE(... ) ((void)__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__))
 
-/////begin nio_samplecode_02
+
 // メモリに格納されているデータ構造
 typedef struct _DataInfo {
   int a;
@@ -31,8 +31,8 @@ void Java_com_example_jni_NioActivity_calcBuffer(JNIEnv* env, jobject thiz,
   int capacity = (*env)->GetDirectBufferCapacity(env, buf); /////-----(3)
   LOGD("Capacity=%d", capacity);
 }
-/////end
-/////begin nio_samplecode_03
+
+
 jobject Java_com_example_jni_NioActivity_getBuffer(JNIEnv* env, jobject thiz,
                                                    jint size) {
   // メモリ確保
@@ -51,4 +51,4 @@ jobject Java_com_example_jni_NioActivity_getBuffer(JNIEnv* env, jobject thiz,
 
   return globalRef;
 }
-/////end
+

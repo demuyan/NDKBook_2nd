@@ -13,7 +13,7 @@ jfloat Java_com_example_jni_PrimitiveActivity_addValues(JNIEnv* env, jobject thi
   return val1+val2;
 }
 
-/////begin field_samplecode_01
+
 // フィールド変数を２つ取得、加算する
 jfloat Java_com_example_jni_PrimitiveActivity_addFieldValues(JNIEnv* env, jobject thiz){
 
@@ -40,8 +40,8 @@ jfloat Java_com_example_jni_PrimitiveActivity_addFieldValues(JNIEnv* env, jobjec
 
   return answer;
 }
-/////end
-/////begin klass_samplecode_01
+
+
 // 文字列を数値に変換し加算して返す
 jfloat Java_com_example_jni_PrimitiveActivity_addValuesStr(JNIEnv* env,
                                                             jobject thiz,
@@ -62,4 +62,4 @@ jfloat Java_com_example_jni_PrimitiveActivity_addValuesStr(JNIEnv* env,
 
   return value1 + value2;
 }
-/////end
+

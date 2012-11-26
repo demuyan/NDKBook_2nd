@@ -1,4 +1,4 @@
-/////begin jnihelp_samplecode_01
+
 #include <jni.h>
 #include <jnihelp.h>
 #include <stdio.h>
@@ -52,4 +52,4 @@ int jniRegisterNativeMethods(JNIEnv* env, const char* className,
   }
   return 0;
 }                                                                                                  /////-----(4)ここまで
-/////end
+

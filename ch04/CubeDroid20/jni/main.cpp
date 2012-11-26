@@ -16,7 +16,7 @@
 extern void initCube(struct engine* engine);
 extern void prepareFrame(struct engine* engine);
 extern void drawCube(struct engine* engine);
-/////begin gles20_samplecode_1
+
 // EGL初期化
 static int engine_init_display(struct engine* engine) {
 
@@ -89,7 +89,7 @@ static int engine_init_display(struct engine* engine) {
 
   return 0;
 }
-/////end
+
 // 毎フレームの描画処理
 static void engine_draw_frame(struct engine* engine) {
 

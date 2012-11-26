@@ -1,4 +1,4 @@
-//////begin ch_multi_samplecode_2
+
 package com.example.nativemediaplayer;
 
 import android.os.Bundle;
@@ -149,4 +149,3 @@ public class MainActivity extends Activity {
     }
   }
 }
-/////end

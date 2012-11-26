@@ -1,6 +1,6 @@
 package com.example.jni;
 
-/////begin exception_samplecode_03
+
 // 自作の例外クラス
 public class MyException extends Exception {
   private String mMsg;
@@ -12,4 +12,3 @@ public class MyException extends Exception {
     return mMsg;
   }
 }
-/////end

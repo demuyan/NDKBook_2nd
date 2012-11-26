@@ -25,7 +25,7 @@ public class ExceptionActivity extends Activity {
 
       @Override
       public void onClick(View v) {        
-/////begin exception_samplecode_01
+
         // protected native int getValue(int index) throws MyException;
         try {
           int value = getValueOfData(9999);
@@ -37,19 +37,19 @@ public class ExceptionActivity extends Activity {
           alert.setMessage(exp.getMessage());
           alert.show();
         }
-/////end
+
       }
     });
   }
 
-/////begin exception_samplecode_03
+
   // 配列の値を取得する
   int getValue(int index) throws IndexOutOfBoundsException {
     int list[] = { 1, 2 };
     // 範囲外にアクセス（ワザと例外を発生させる）
     return list[index];
   }
-/////end
+
   // 値を取得（例外が発生するサンプル）
   protected native int getValueOfData(int index) throws MyException;
 

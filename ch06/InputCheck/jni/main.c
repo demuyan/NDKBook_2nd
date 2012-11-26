@@ -11,9 +11,9 @@
 
 #include <fonttexture.h>
 #include <glyphpos.h>
-/////begin ch06_samplecode_4_02
+
 #include <android/sensor.h> /////-----(1)
-/////end 
+
 #include <android/log.h>
 #include <android_native_app_glue.h>
 #include <android/input.h>
@@ -47,11 +47,11 @@ struct saved_state {
   float angle;
 };
 
-/////begin ch06_samplecode_4_01
+
 #define SENSOR_MAX (5)
 // センサー
 typedef struct _sensor_type {
-  const ASensor* sensor;   /////-----(4)センサーのデータ格納
+  const ASensor* sensor;   
   int   type;
   ASensorVector value;
 } sensor_type;
@@ -61,8 +61,8 @@ struct engine {
   // センサー関連
   ASensorManager* sensorManager; // センサーマネージャ            /////-----(2)
   ASensorEventQueue* sensorEventQueue; // センサーイベントキュー  /////-----(3)
-  sensor_type sensors[SENSOR_MAX];    
-/////end
+  sensor_type sensors[SENSOR_MAX];    // センサーのデータ格納    /////-----(4)
+
   struct android_app* app;
   // アニメーションフラグ
   int animating;
@@ -322,7 +322,7 @@ void displayKeys(struct engine* engine) {
   sprintf(buf, "VOLUMEDOWN = %s", engine->volumedown_keydown ? "DOWN" : "UP");
   RenderString(engine->width / 2 + 64, engine->height - 32 - y, buf);
 }
-//////begin ch06_samplecode_11
+
 // Configurationを表示する
 void displayConfiguration(struct engine* engine) {
   int idx = 0;
@@ -441,7 +441,7 @@ void displayConfiguration(struct engine* engine) {
   idx = AConfiguration_getUiModeNight(engine->app->config);
   LOGI("UiModeNight:%s", uimodenight_list[idx]);
 }
-/////end
+
 //  毎フレーム描画
 static void engine_draw_frame(struct engine* engine) {
 
@@ -492,7 +492,7 @@ static void engine_term_display(struct engine* engine) {
   engine->surface = EGL_NO_SURFACE;
 }
 
-/////begin ch06_samplecode_2
+
 ///// タッチイベント処理
 void get_touch_position(struct android_app* app, AInputEvent* event) {
   struct engine* engine = (struct engine*) app->userData;
@@ -514,8 +514,8 @@ void get_touch_position(struct android_app* app, AInputEvent* event) {
     engine->point_count = 0;
   }
 }
-/////end
-/////begin ch06_samplecode_3
+
+
 ///// キー入力イベント処理
 void get_key_event(struct android_app* app, AInputEvent* event) {
   struct engine* engine = (struct engine*) app->userData;
@@ -545,8 +545,8 @@ void get_key_event(struct android_app* app, AInputEvent* event) {
     }
   }
 }
-/////end
-/////begin ch06_samplecode_1
+
+
 // 入力イベントを処理する
 static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) {
   struct engine* engine = (struct engine*) app->userData;
@@ -564,8 +564,8 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
   }
   return 0;
 }
-/////end
-/////begin ch06_samplecode_5
+
+
 //センサーの初期化
 void init_sensors(struct engine* engine,struct android_app* state) {
   // センサーマネージャの取得
@@ -600,9 +600,9 @@ void init_sensors(struct engine* engine,struct android_app* state) {
   engine->sensorEventQueue = ASensorManager_createEventQueue( /////-----(5)
       engine->sensorManager, state->looper, LOOPER_ID_USER, NULL, NULL);
 }
-/////end
 
-/////begin ch06_samplecode_6
+
+
 // センサーからの値取得を許可する
 void enable_sensors(struct engine* engine) {
   int i;
@@ -618,8 +618,8 @@ void enable_sensors(struct engine* engine) {
     }
   }
 }
-/////end
-/////begin ch06_samplecode_7
+
+
 // センサーからの値取得を不許可にする
 void disable_sensors(struct engine* engine) {
   int i;
@@ -630,7 +630,7 @@ void disable_sensors(struct engine* engine) {
     }
   }
 }
-/////end
+
 
 // メインコマンドの処理
 static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
@@ -697,7 +697,7 @@ void android_main(struct android_app* state) {
   // Configurationを表示
   displayConfiguration(&engine);
 
-/////begin ch06_samplecode_8
+
   engine.animating = 1;
   while (1) {
 
@@ -738,5 +738,5 @@ void android_main(struct android_app* state) {
     // 画面の描画
     engine_draw_frame(&engine);
   }
-/////end
+
 }

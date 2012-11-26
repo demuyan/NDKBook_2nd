@@ -30,7 +30,7 @@ public class NioActivity extends Activity {
 
       @Override
       public void onClick(View v) {
-    /////begin nio_samplecode_01
+
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(10);   /////-----(1)
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);               /////-----(2)
 
@@ -51,7 +51,7 @@ public class NioActivity extends Activity {
         strBuf.append("b=" + byteBuffer.getShort(4) + "\n");
         strBuf.append("c=" + byteBuffer.get(6) + "\n");   /////-----(5)ここまで
         mTextView.setText(strBuf.toString());
-        /////end
+
       }
     });
 

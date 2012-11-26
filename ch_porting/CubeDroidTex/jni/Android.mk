@@ -1,4 +1,4 @@
-#/////begin libpng_samplecode_02
+
 LOCAL_PATH := $(call my-dir)
 
 # libpngをAndroidで利用できるように
@@ -21,4 +21,3 @@ include $(BUILD_SHARED_LIBRARY)
 
 # NativeActivityGlueのモジュール
 $(call import-module,android/native_app_glue)
-#/////end

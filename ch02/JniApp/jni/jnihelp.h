@@ -1,4 +1,4 @@
-/////begin jnihelp_samplecode_02
+
 #ifndef _jnihelp_h
 #define _jnihelp_h
 
@@ -21,4 +21,4 @@ extern "C" {
 }
 #endif
 #endif
-/////end
+
